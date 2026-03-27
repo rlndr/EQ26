@@ -1,5 +1,5 @@
 import { ExternalLink, X } from 'lucide-react'
-import { getMagnitudeBand, parseRegion } from '../lib/api'
+import { getMagnitudeBand, parseRegion, isSafeUrl } from '../lib/api'
 import type { EarthquakeFeature } from '../lib/api'
 
 interface EventsListProps {
@@ -63,37 +63,39 @@ export default function EventsList({ features, selectedRegion, onClearFilter }: 
               const { mag, place, time, url } = feature.properties
               const band = getMagnitudeBand(mag)
               const badgeClass = BADGE_STYLES[band] ?? BADGE_STYLES['M5.x']
+              const safeUrl = isSafeUrl(url) ? url : null
+              const inner = (
+                <>
+                  <span className={`shrink-0 inline-flex items-center justify-center rounded border text-xs font-bold tabular-nums px-2 py-0.5 min-w-[52px] ${badgeClass}`}>
+                    M {mag != null ? mag.toFixed(1) : '?'}
+                  </span>
+                  <span className="flex-1 text-sm text-zinc-200 truncate min-w-0">
+                    {place || 'Unknown location'}
+                  </span>
+                  <span className="shrink-0 text-xs text-zinc-500 tabular-nums whitespace-nowrap">
+                    {formatDate(time)}
+                  </span>
+                  {safeUrl && (
+                    <ExternalLink size={12} className="shrink-0 text-zinc-700 group-hover:text-zinc-400 transition-colors" />
+                  )}
+                </>
+              )
               return (
                 <li key={idx} className="group">
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-800/50 transition-colors"
-                  >
-                    {/* Magnitude badge */}
-                    <span
-                      className={`shrink-0 inline-flex items-center justify-center rounded border text-xs font-bold tabular-nums px-2 py-0.5 min-w-[52px] ${badgeClass}`}
+                  {safeUrl ? (
+                    <a
+                      href={safeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-800/50 transition-colors"
                     >
-                      M {mag != null ? mag.toFixed(1) : '?'}
-                    </span>
-
-                    {/* Place */}
-                    <span className="flex-1 text-sm text-zinc-200 truncate min-w-0">
-                      {place || 'Unknown location'}
-                    </span>
-
-                    {/* Date */}
-                    <span className="shrink-0 text-xs text-zinc-500 tabular-nums whitespace-nowrap">
-                      {formatDate(time)}
-                    </span>
-
-                    {/* External link icon */}
-                    <ExternalLink
-                      size={12}
-                      className="shrink-0 text-zinc-700 group-hover:text-zinc-400 transition-colors"
-                    />
-                  </a>
+                      {inner}
+                    </a>
+                  ) : (
+                    <div className="flex items-center gap-3 px-4 py-2.5">
+                      {inner}
+                    </div>
+                  )}
                 </li>
               )
             })}

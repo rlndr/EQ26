@@ -72,6 +72,8 @@ export default function App() {
   const { data: features, isLoading, isError, error } = useQuery({
     queryKey: ['earthquakes', year, month],
     queryFn: () => fetchEarthquakes(year, month),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   })
 
   const processed = features ? processEarthquakes(features) : null

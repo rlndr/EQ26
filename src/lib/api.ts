@@ -38,7 +38,12 @@ export async function fetchEarthquakes(
   const response = await fetch(url)
 
   if (!response.ok) {
-    throw new Error(`USGS API error: ${response.status} ${response.statusText}`)
+    throw new Error(
+      response.status === 400 ? 'Invalid request parameters.' :
+      response.status === 404 ? 'No data found for this period.' :
+      response.status >= 500 ? 'The USGS service is temporarily unavailable.' :
+      'Failed to load earthquake data. Please try again.'
+    )
   }
 
   const data: EarthquakeResponse = await response.json()
@@ -62,6 +67,18 @@ export function parseRegion(place: string): string {
   }
   const region = trimmed.slice(lastComma + 1).trim()
   return region || 'Unknown'
+}
+
+/**
+ * Validate that a URL is safe to use as an href — must be https and on usgs.gov.
+ */
+export function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'https:' && parsed.hostname.endsWith('.usgs.gov')
+  } catch {
+    return false
+  }
 }
 
 /**
