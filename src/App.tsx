@@ -176,7 +176,7 @@ export default function App() {
           >
             USGS Earthquake Hazards Program API
           </a>
-          . EQ26 — {new Date().getUTCFullYear()}
+          . EQ26 — Land3r.net
         </div>
       </footer>
     </div>
