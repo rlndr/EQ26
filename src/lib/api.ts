@@ -6,6 +6,10 @@ export interface EarthquakeFeature {
     url: string
     title: string
   }
+  geometry: {
+    type: 'Point'
+    coordinates: [number, number, number] // [longitude, latitude, depth_km]
+  }
 }
 
 export interface EarthquakeResponse {

@@ -27,6 +27,12 @@ function formatDate(timestamp: number): string {
   return `${month} ${day}, ${year} ${hh}:${mm} UTC`
 }
 
+function formatDepth(depth: number | null | undefined): string | null {
+  if (depth == null || Number.isNaN(depth)) return null
+  // USGS reports depth in km; negative values (above sea level) are rare but possible
+  return `${depth.toFixed(1)} km`
+}
+
 export default function EventsList({ features, selectedRegion, onClearFilter }: EventsListProps) {
   const visible = selectedRegion
     ? features.filter((f) => parseRegion(f.properties.place) === selectedRegion)
@@ -61,6 +67,8 @@ export default function EventsList({ features, selectedRegion, onClearFilter }: 
           <ul className="divide-y divide-zinc-800/60">
             {visible.map((feature, idx) => {
               const { mag, place, time, url } = feature.properties
+              const depth = feature.geometry?.coordinates?.[2]
+              const depthLabel = formatDepth(depth)
               const band = getMagnitudeBand(mag)
               const badgeClass = BADGE_STYLES[band] ?? BADGE_STYLES['M5.x']
               const safeUrl = isSafeUrl(url) ? url : null
@@ -74,6 +82,12 @@ export default function EventsList({ features, selectedRegion, onClearFilter }: 
                   </span>
                   <span className="shrink-0 text-xs text-zinc-500 tabular-nums whitespace-nowrap">
                     {formatDate(time)}
+                    {depthLabel && (
+                      <>
+                        <span className="mx-1.5 text-zinc-700">·</span>
+                        <span className="text-zinc-400">{depthLabel}</span>
+                      </>
+                    )}
                   </span>
                   {safeUrl && (
                     <ExternalLink size={12} className="shrink-0 text-zinc-700 group-hover:text-zinc-400 transition-colors" />
