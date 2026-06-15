@@ -1,8 +1,20 @@
-# EQ26 — Earthquake Monitor
+# land3r.net
 
-A dark, compact web application for exploring the frequency and severity of earthquakes worldwide. Data is sourced in real time from the USGS Earthquake Hazards Program public API.
+A personal website built with React and TypeScript. The earthquake monitor is the first of several tools and projects hosted here.
 
-## Features
+## Pages
+
+| Route | Description |
+|---|---|
+| `/` | Personal landing page |
+| `/projects` | Project index |
+| `/projects/earthquakes` | EQ26 — Global Earthquake Monitor |
+
+## EQ26 — Earthquake Monitor
+
+Explores the frequency and severity of earthquakes worldwide. Data is sourced in real time from the USGS Earthquake Hazards Program public API. Only earthquakes with a magnitude of **5.0 or higher** are included.
+
+### Features
 
 - **Month selector** — browse any month going back 2 years
 - **Summary cards** — total events, max magnitude, regions affected, and strongest event location
@@ -10,9 +22,7 @@ A dark, compact web application for exploring the frequency and severity of eart
 - **Region table** — top 15 affected regions with per-band counts
 - **Events list** — full scrollable list of events sorted by magnitude, each linking to the USGS event page
 
-Only earthquakes with a magnitude of **5.0 or higher** are included.
-
-## Data Source
+### Data Source
 
 All earthquake data is fetched directly from the **USGS Earthquake Hazards Program FDSNWS API**:
 
@@ -28,6 +38,7 @@ No API key is required. Data is fetched client-side on demand.
 |---|---|
 | Build tool | [Vite](https://vitejs.dev/) v8 |
 | Framework | [React](https://react.dev/) v19 + TypeScript |
+| Routing | [React Router](https://reactrouter.com/) v7 |
 | Data fetching & caching | [TanStack Query](https://tanstack.com/query) v5 |
 | Styling | [Tailwind CSS](https://tailwindcss.com/) v3 (dark mode) |
 | Charts | [Recharts](https://recharts.org/) v3 |
@@ -35,7 +46,7 @@ No API key is required. Data is fetched client-side on demand.
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) v18 or higher
+- [Node.js](https://nodejs.org/) v22 or higher (see `.nvmrc`)
 - npm v9 or higher
 
 ## Getting Started
@@ -73,6 +84,7 @@ npm run lint
 src/
 ├── components/
 │   ├── EventsList.tsx       # Scrollable list of individual earthquake events
+│   ├── Layout.tsx           # Shared nav, footer, and page shell
 │   ├── MagnitudeChart.tsx   # Recharts bar chart by magnitude band
 │   ├── MonthSelector.tsx    # Month/year picker dropdown
 │   ├── RegionTable.tsx      # Top regions table with band breakdown
@@ -81,7 +93,11 @@ src/
 │   ├── api.ts               # USGS API fetch, region parsing, magnitude banding
 │   ├── process.ts           # Data aggregation and transformation
 │   └── utils.ts             # Tailwind class merge utility
-├── App.tsx                  # Root component, query orchestration, layout
+├── pages/
+│   ├── EQPage.tsx           # Earthquake monitor dashboard
+│   ├── LandingPage.tsx      # Personal home page
+│   └── ProjectsPage.tsx     # Project index
+├── App.tsx                  # Route definitions
 ├── main.tsx                 # React entry point, QueryClientProvider setup
 └── index.css                # Tailwind directives, global styles
 ```
