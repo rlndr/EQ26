@@ -1,6 +1,7 @@
 # land3r.net
 
-A personal website built with React and TypeScript. The earthquake monitor is the first of several tools and projects hosted here.
+A personal website for testing new technologies. 
+The earthquake monitor is the first of several tools and projects hosted here.
 
 ## Pages
 
