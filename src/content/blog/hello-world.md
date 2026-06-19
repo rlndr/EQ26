@@ -10,6 +10,6 @@ This is the first post on land3r.net. The site is a personal space for tools, ex
 
 ## What's here
 
-The first project is an **earthquake monitor** that pulls live data from the USGS Earthquake Hazards Program API, letting you browse M5.0+ seismic events by month, region, and magnitude band.
+The first project is an **earthquake monitor** that pulls live data from the USGS Earthquake Hazards Program API, letting you browse M5.0+ seismic events by month, region, and magnitude band. 
 
 More projects and posts to come.

@@ -35,7 +35,7 @@ export default function BlogPostPage() {
         <h1 className="text-3xl font-bold text-zinc-100 mb-2">{post.title}</h1>
         {post.date && (
           <p className="text-sm text-zinc-500">
-            {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            {(([y, m, d]) => new Date(+y, +m - 1, +d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }))(post.date.split('-'))}
           </p>
         )}
       </header>
