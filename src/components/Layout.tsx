@@ -37,6 +37,18 @@ export default function Layout() {
             >
               Projects
             </NavLink>
+            <NavLink
+              to="/blog"
+              className={({ isActive }) =>
+                `px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-zinc-800 text-zinc-100'
+                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50'
+                }`
+              }
+            >
+              Blog
+            </NavLink>
           </nav>
         </div>
       </header>
