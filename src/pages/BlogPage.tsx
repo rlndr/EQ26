@@ -33,7 +33,7 @@ export default function BlogPage() {
                 </div>
                 {post.date && (
                   <p className="text-xs text-zinc-600 mt-3">
-                    {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {(([y, m, d]) => new Date(+y, +m - 1, +d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }))(post.date.split('-'))}
                   </p>
                 )}
               </button>
