@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, ArrowRight } from 'lucide-react'
+import { Activity, ArrowRight, BookOpen } from 'lucide-react'
 
 const projects = [
   {
@@ -8,6 +8,13 @@ const projects = [
     icon: Activity,
     accent: 'text-rose-500',
     href: '/projects/earthquakes',
+  },
+  {
+    title: 'Blog',
+    description: 'Thoughts, notes, and writing on things I find interesting.',
+    icon: BookOpen,
+    accent: 'text-rose-500',
+    href: '/blog',
   },
 ]
 
