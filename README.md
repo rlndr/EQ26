@@ -1,6 +1,6 @@
 # land3r.net
 
-A personal website for testing new technologies. 
+A personal website for testing new technologies.
 The earthquake monitor is the first of several tools and projects hosted here.
 
 ## Pages
@@ -10,6 +10,9 @@ The earthquake monitor is the first of several tools and projects hosted here.
 | `/` | Personal landing page |
 | `/projects` | Project index |
 | `/projects/earthquakes` | EQ26 — Global Earthquake Monitor |
+| `/projects/iss` | ISS Tracker — Live position of the International Space Station |
+| `/blog` | Blog post index |
+| `/blog/:slug` | Individual blog post |
 
 ## EQ26 — Earthquake Monitor
 
@@ -33,6 +36,40 @@ https://earthquake.usgs.gov/fdsnws/event/1/
 
 No API key is required. Data is fetched client-side on demand.
 
+## ISS Tracker
+
+Displays the live position of the International Space Station on a world map, updating every 5 seconds. Position data is fetched via an AWS Lambda proxy (required to bridge the HTTP-only Open Notify API to the HTTPS site).
+
+### Features
+
+- **Live map** — Leaflet.js world map with ISS position marker
+- **Auto-polling** — position updates every 5 seconds via TanStack Query
+- **Smooth animation** — marker glides between poll positions via CSS transition
+- **Info panel** — live latitude/longitude, plus altitude and speed
+- **Stale/error states** — banner shown if the upstream API is unreachable
+
+### Data Source
+
+Position data is sourced from the **Open Notify ISS API** via an AWS Lambda Function URL proxy:
+
+```
+http://api.open-notify.org/iss-now.json
+```
+
+## Blog
+
+Markdown-based blog sourced from `.md` files in `src/content/blog/`. Adding a post is as simple as dropping a `.md` file with the required frontmatter and rebuilding.
+
+### Frontmatter format
+
+```yaml
+---
+title: Post Title
+date: 2026-06-19
+description: One-line summary shown on the index page.
+---
+```
+
 ## Technology Stack
 
 | Layer | Technology |
@@ -43,7 +80,10 @@ No API key is required. Data is fetched client-side on demand.
 | Data fetching & caching | [TanStack Query](https://tanstack.com/query) v5 |
 | Styling | [Tailwind CSS](https://tailwindcss.com/) v3 (dark mode) |
 | Charts | [Recharts](https://recharts.org/) v3 |
+| Map | [Leaflet](https://leafletjs.com/) + [react-leaflet](https://react-leaflet.js.org/) |
+| Markdown | [marked](https://marked.js.org/) |
 | Icons | [Lucide React](https://lucide.dev/) |
+| Backend proxy | AWS Lambda (Node.js 24.x) via Function URL |
 
 ## Prerequisites
 
@@ -90,12 +130,18 @@ src/
 │   ├── MonthSelector.tsx    # Month/year picker dropdown
 │   ├── RegionTable.tsx      # Top regions table with band breakdown
 │   └── SummaryCards.tsx     # Top-line summary metric cards
+├── content/
+│   └── blog/                # Markdown blog posts (drop .md files here)
 ├── lib/
 │   ├── api.ts               # USGS API fetch, region parsing, magnitude banding
+│   ├── blog.ts              # Blog post loader and frontmatter parser
 │   ├── process.ts           # Data aggregation and transformation
 │   └── utils.ts             # Tailwind class merge utility
 ├── pages/
+│   ├── BlogPage.tsx         # Blog post index
+│   ├── BlogPostPage.tsx     # Individual blog post renderer
 │   ├── EQPage.tsx           # Earthquake monitor dashboard
+│   ├── ISSPage.tsx          # ISS live tracker
 │   ├── LandingPage.tsx      # Personal home page
 │   └── ProjectsPage.tsx     # Project index
 ├── App.tsx                  # Route definitions
