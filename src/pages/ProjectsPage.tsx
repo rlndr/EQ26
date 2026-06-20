@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, ArrowRight, BookOpen } from 'lucide-react'
+import { Activity, ArrowRight, BookOpen, Satellite } from 'lucide-react'
 
 const projects = [
   {
@@ -8,6 +8,13 @@ const projects = [
     icon: Activity,
     accent: 'text-rose-500',
     href: '/projects/earthquakes',
+  },
+  {
+    title: 'ISS Tracker',
+    description: 'Live position of the International Space Station on a world map, updating every 5 seconds.',
+    icon: Satellite,
+    accent: 'text-rose-500',
+    href: '/projects/iss',
   },
   {
     title: 'Blog',

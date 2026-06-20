@@ -11,3 +11,8 @@ body {
   width: 100%;
   min-height: 100vh;
 }
+
+/* Smooth ISS marker movement between polls */
+.leaflet-marker-pane * {
+  transition: transform 4s linear;
+}
