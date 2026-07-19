@@ -27,6 +27,7 @@ interface PlanetsPayload {
   stepDays: number
   stale: boolean
   planets: Record<string, [number, number][]> // daily [x, y] in AU, heliocentric ecliptic
+  moon?: [number, number][] // daily [x, y] in AU relative to Earth (geocentric)
 }
 
 interface PlanetPosition {
@@ -65,17 +66,17 @@ function tightestCluster(longitudes: number[], windowDeg = 60) {
 const SIZE = 640
 const CENTER = SIZE / 2
 const MAX_R = 270
-// Compressed radial scale: sqrt keeps the inner planets legible while angles stay exact.
-const scaleAu = (au: number) => (Math.sqrt(au) / Math.sqrt(30.07)) * MAX_R
+// Outermost orbit per view: Neptune for the full system, Mars for the inner planets
+const VIEW_MAX_AU = { full: 30.07, inner: 1.52 } as const
+type ViewMode = keyof typeof VIEW_MAX_AU
+
+// Exaggerated Earth–Moon gap in px: to scale the Moon would sit inside Earth's dot
+const MOON_ORBIT_PX = 20
 
 // SVG y grows downward; negate so longitude increases counterclockwise (view from ecliptic north)
 function polar(r: number, deg: number) {
   const theta = (deg * Math.PI) / 180
   return { x: CENTER + r * Math.cos(theta), y: CENTER - r * Math.sin(theta) }
-}
-
-function planetXY(distance: number, longitude: number) {
-  return polar(scaleAu(distance), longitude)
 }
 
 const TICKS = Array.from({ length: 12 }, (_, i) => i * 30)
@@ -87,6 +88,7 @@ export default function PlanetsPage() {
     staleTime: Infinity,
   })
 
+  const [view, setView] = useState<ViewMode>('full')
   const [selected, setSelected] = useState<number | null>(null)
   const [playing, setPlaying] = useState(false)
   // "Today" frozen at mount: Date.now() is impure during render, and a minutes-old value is fine here
@@ -129,6 +131,28 @@ export default function PlanetsPage() {
   )
   const cluster = positions.size ? tightestCluster([...positions.values()].map((p) => p.longitude)) : null
 
+  const visiblePlanets = view === 'inner' ? PLANETS.filter((p) => p.au <= VIEW_MAX_AU.inner) : PLANETS
+  const scale = (au: number) => Math.sqrt(au / VIEW_MAX_AU[view]) * MAX_R
+
+  // Moon: true geocentric direction, exaggerated distance from Earth
+  const earthPos = positions.get('earth')
+  const moonVec = data?.moon?.[Math.min(viewIndex, (data.moon?.length ?? 1) - 1)]
+  const moon =
+    view === 'inner' && earthPos && moonVec
+      ? (() => {
+          const earthXY = polar(scale(earthPos.distance), earthPos.longitude)
+          const dirDeg = ((Math.atan2(moonVec[1], moonVec[0]) * 180) / Math.PI + 360) % 360
+          const rad = (dirDeg * Math.PI) / 180
+          return {
+            earthXY,
+            x: earthXY.x + MOON_ORBIT_PX * Math.cos(rad),
+            y: earthXY.y - MOON_ORBIT_PX * Math.sin(rad),
+            distKm: Math.round(Math.hypot(moonVec[0], moonVec[1]) * 1.495978707e8),
+            dirDeg,
+          }
+        })()
+      : null
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
       <div className="flex items-center justify-between mb-2">
@@ -148,12 +172,27 @@ export default function PlanetsPage() {
         Positions of the planets around the Sun, viewed from above the ecliptic — drag the timeline
         or press play to wind through ±6 months. Data from NASA JPL Horizons. Angles are exact;
         orbit distances are compressed to keep the inner planets visible. The 0° mark points to the
-        vernal equinox (♈), the zero point of ecliptic longitude used in the table.
+        vernal equinox (♈), the zero point of ecliptic longitude used in the table. The
+        inner-planet view adds the Moon in its true direction from Earth, at an exaggerated
+        distance for visibility.
       </p>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <div className="flex gap-1 bg-zinc-950 border border-zinc-800 rounded-md p-0.5">
+              {(['inner', 'full'] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                    view === v ? 'bg-zinc-800 text-zinc-100' : 'text-zinc-400 hover:text-zinc-100'
+                  }`}
+                >
+                  {v === 'inner' ? 'Inner planets' : 'Full system'}
+                </button>
+              ))}
+            </div>
             <button
               onClick={() => setPlaying((p) => !p)}
               disabled={!data}
@@ -172,7 +211,7 @@ export default function PlanetsPage() {
                 setPlaying(false)
                 setSelected(Number(e.target.value))
               }}
-              className="flex-1 accent-rose-500"
+              className="flex-1 min-w-32 accent-rose-500"
               aria-label="Date"
             />
             <span className="text-xs font-mono text-zinc-400 w-24 text-right">
@@ -210,12 +249,12 @@ export default function PlanetsPage() {
               )
             })}
             <line x1={CENTER} y1={CENTER} x2={CENTER + 276} y2={CENTER} stroke="#27272a" strokeWidth={1} strokeDasharray="3 5" />
-            {PLANETS.map((p) => (
+            {visiblePlanets.map((p) => (
               <circle
                 key={`orbit-${p.key}`}
                 cx={CENTER}
                 cy={CENTER}
-                r={scaleAu(p.au)}
+                r={scale(p.au)}
                 fill="none"
                 stroke="#27272a"
                 strokeWidth={1}
@@ -223,10 +262,10 @@ export default function PlanetsPage() {
             ))}
             <circle cx={CENTER} cy={CENTER} r={12} fill="#fbbf24" opacity={0.25} />
             <circle cx={CENTER} cy={CENTER} r={7} fill="#fbbf24" />
-            {PLANETS.map((p) => {
+            {visiblePlanets.map((p) => {
               const pos = positions.get(p.key)
               if (!pos) return null
-              const { x, y } = planetXY(pos.distance, pos.longitude)
+              const { x, y } = polar(scale(pos.distance), pos.longitude)
               return (
                 <g key={p.key}>
                   <circle cx={x} cy={y} r={p.dot} fill={p.color}>
@@ -238,6 +277,17 @@ export default function PlanetsPage() {
                 </g>
               )
             })}
+            {moon && (
+              <g>
+                <circle cx={moon.earthXY.x} cy={moon.earthXY.y} r={MOON_ORBIT_PX} fill="none" stroke="#3f3f46" strokeWidth={1} strokeDasharray="2 3" />
+                <circle cx={moon.x} cy={moon.y} r={2.5} fill="#d4d4d8">
+                  <title>{`Moon — ${moon.distKm.toLocaleString()} km from Earth, ${moon.dirDeg.toFixed(1)}° (distance not to scale)`}</title>
+                </circle>
+                <text x={moon.x + 6} y={moon.y + 3} fontSize={9} fill="#71717a">
+                  Moon
+                </text>
+              </g>
+            )}
             {isPending && (
               <text x={CENTER} y={CENTER + 40} fontSize={13} fill="#71717a" textAnchor="middle">
                 Loading positions…

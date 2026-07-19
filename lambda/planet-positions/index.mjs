@@ -27,14 +27,14 @@ const PLANETS = [
 
 let cache = null // { day: 'YYYY-MM-DD', payload: { generated, startDate, stepDays, planets } }
 
-async function fetchPlanetSeries(id, start, stop) {
+async function fetchPlanetSeries(id, start, stop, { center = '500@10', decimals = 4 } = {}) {
   const params = new URLSearchParams({
     format: 'json',
     COMMAND: `'${id}'`,
     OBJ_DATA: "'NO'",
     MAKE_EPHEM: "'YES'",
     EPHEM_TYPE: "'VECTORS'",
-    CENTER: "'500@10'",
+    CENTER: `'${center}'`,
     VEC_TABLE: "'1'",
     CSV_FORMAT: "'YES'",
     START_TIME: `'${start}'`,
@@ -56,7 +56,7 @@ async function fetchPlanetSeries(id, start, stop) {
       const y = Number(cols[3]) / AU_KM
       if (Number.isNaN(x) || Number.isNaN(y)) throw new Error(`Unparseable row for body ${id}`)
       // 4 decimals of an AU (~15,000 km) is ample for the graphic and keeps the payload small
-      return [Number(x.toFixed(4)), Number(y.toFixed(4))]
+      return [Number(x.toFixed(decimals)), Number(y.toFixed(decimals))]
     })
 }
 
@@ -79,11 +79,15 @@ export const handler = async () => {
     for (const [name, id] of PLANETS) {
       planets[name] = await fetchPlanetSeries(id, start, stop)
     }
+    // Moon is served geocentric ([x, y] relative to Earth) so the frontend can draw it
+    // around Earth. 6 decimals: lunar distance (~0.0026 AU) would vanish at 4.
+    const moon = await fetchPlanetSeries('301', start, stop, { center: '500@399', decimals: 6 })
     const payload = {
       generated: new Date().toISOString(),
       startDate: start,
       stepDays: 1,
       planets,
+      moon,
     }
     cache = { day: today, payload }
     return respond(payload, false)

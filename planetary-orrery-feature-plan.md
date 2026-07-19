@@ -100,7 +100,9 @@ If Horizons is unreachable, serve the last cached payload with `"stale": true` �
 
 ## 6. Deferred / Stretch Goals
 
-- Toggle between inner-planet zoom and full-system view
-- Include the Moon, Pluto, or a famous comet
+- ✓ Toggle between inner-planet zoom and full-system view — inner view includes the Moon
+  (served geocentric at 6 decimals from the Lambda; drawn in its true direction from Earth
+  at an exaggerated distance, since ~0.0026 AU is invisible at orrery scale)
+- Include Pluto or a famous comet
 - "Next great alignment" finder — scan future ephemeris for tight clusters
 - Geocentric night-sky view ("which planets can I see tonight?") — different projection, same data
