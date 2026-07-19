@@ -88,13 +88,13 @@ If Horizons is unreachable, serve the last cached payload with `"stale": true` �
 
 ## 5. Build Steps
 
-1. **Parse locally** — Script that queries Horizons for one planet, parses the `$$SOE` blob, prints AU coordinates. Confirms the data pipeline before any UI exists.
-2. **Static orrery** — SVG with Sun, orbit rings, and planets at hard-coded positions. Nail the radial scale here.
-3. **Lambda** — Fan-out to 8 planets, parse, cache, return the JSON above. Deploy via `amplify add function` + REST route, as with `issPosition`.
-4. **Live positions** — Frontend fetches once on load (React Query, no polling needed), renders today's positions.
-5. **Date scrubber** — Slider indexes into the pre-fetched daily arrays; requestAnimationFrame for smooth "play" mode.
-6. **Alignment readout** — Ecliptic longitudes, angular separations, cluster highlight.
-7. **Polish** — Planet colors/sizes, hover states, mobile layout, stale-data banner.
+1. ✓ **Parse locally** — Script that queries Horizons for one planet, parses the `$$SOE` blob, prints AU coordinates. Confirms the data pipeline before any UI exists.
+2. ✓ **Static orrery** — SVG with Sun, orbit rings, and planets at hard-coded positions. Nail the radial scale here. (Also: reference ring with 30° ticks, 0° = vernal equinox.)
+3. ✓ **Lambda** — Deployed 2026-07-18 as `planetPositions` (console-created, us-west-2, Node 22, 60s timeout), source in `lambda/planet-positions/index.mjs`. Served same-origin at `/api/planets` via Amplify 200 rewrites (both slash variants, ordered above the SPA catch-all) because ad blockers block `*.lambda-url.on.aws`.
+4. ✓ **Live positions** — Frontend fetches once on load (React Query, no polling needed), renders today's positions.
+5. ✓ **Date scrubber** — Slider indexes into the pre-fetched daily arrays; requestAnimationFrame "play" mode at 20 days/sec, wrapping at the end of the window; "Today" button resets.
+6. ✓ **Alignment readout** — Ecliptic longitudes, cluster highlight ("N planets within X°").
+7. **Polish** — Mostly done (colors, hover tooltips, stale-data banner); mobile layout still unchecked.
 
 ---
 
