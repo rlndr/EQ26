@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, ArrowRight, BookOpen, Satellite } from 'lucide-react'
+import { Activity, ArrowRight, BookOpen, Orbit, Satellite } from 'lucide-react'
 
 const projects = [
   {
@@ -15,6 +15,13 @@ const projects = [
     icon: Satellite,
     accent: 'text-rose-500',
     href: '/projects/iss',
+  },
+  {
+    title: 'Planetary Orrery',
+    description: 'Current positions of the planets around the Sun, drawn from NASA JPL Horizons ephemeris data, with an alignment readout.',
+    icon: Orbit,
+    accent: 'text-rose-500',
+    href: '/projects/planets',
   },
   {
     title: 'Blog',
