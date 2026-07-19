@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Pause, Play } from 'lucide-react'
 
 // Same-origin path to the planetPositions Lambda (source: lambda/planet-positions/index.mjs),
 // which serves ±6 months of daily heliocentric positions parsed from JPL Horizons.
@@ -85,12 +87,43 @@ export default function PlanetsPage() {
     staleTime: Infinity,
   })
 
-  const dayIndex = data ? Math.round((Date.now() - Date.parse(data.startDate)) / DAY_MS / data.stepDays) : 0
+  const [selected, setSelected] = useState<number | null>(null)
+  const [playing, setPlaying] = useState(false)
+  // "Today" frozen at mount: Date.now() is impure during render, and a minutes-old value is fine here
+  const [mountedAt] = useState(() => Date.now())
+
+  const seriesLen = data?.planets.earth?.length ?? 0
+  const todayIndex = data
+    ? Math.min(
+        Math.max(Math.round((mountedAt - Date.parse(data.startDate)) / DAY_MS / data.stepDays), 0),
+        Math.max(seriesLen - 1, 0),
+      )
+    : 0
+  const viewIndex = selected ?? todayIndex
+  const viewDate = data ? new Date(Date.parse(data.startDate) + viewIndex * data.stepDays * DAY_MS) : null
+
+  useEffect(() => {
+    if (!playing || seriesLen === 0) return
+    const msPerDay = 1000 / 20 // play speed: 20 days of motion per second
+    let raf = 0
+    let last = performance.now()
+    const step = (now: number) => {
+      const advance = Math.floor((now - last) / msPerDay)
+      if (advance > 0) {
+        last += advance * msPerDay
+        setSelected((s) => ((s ?? todayIndex) + advance) % seriesLen)
+      }
+      raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [playing, seriesLen, todayIndex])
+
   const positions = new Map(
     data
       ? PLANETS.flatMap((p) => {
           const series = data.planets[p.key]
-          return series?.length ? [[p.key, positionAt(series, dayIndex)] as const] : []
+          return series?.length ? [[p.key, positionAt(series, viewIndex)] as const] : []
         })
       : [],
   )
@@ -112,14 +145,53 @@ export default function PlanetsPage() {
         )}
       </div>
       <p className="text-zinc-400 mb-6">
-        Today's positions of the planets around the Sun, viewed from above the ecliptic. Data from
-        NASA JPL Horizons. Angles are exact; orbit distances are compressed to keep the inner
-        planets visible. The 0° mark points to the vernal equinox (♈), the zero point of ecliptic
-        longitude used in the table.
+        Positions of the planets around the Sun, viewed from above the ecliptic — drag the timeline
+        or press play to wind through ±6 months. Data from NASA JPL Horizons. Angles are exact;
+        orbit distances are compressed to keep the inner planets visible. The 0° mark points to the
+        vernal equinox (♈), the zero point of ecliptic longitude used in the table.
       </p>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <button
+              onClick={() => setPlaying((p) => !p)}
+              disabled={!data}
+              className="p-1.5 rounded-md border border-zinc-700 text-zinc-300 hover:bg-zinc-800 disabled:opacity-40 transition-colors"
+              aria-label={playing ? 'Pause' : 'Play'}
+            >
+              {playing ? <Pause size={14} /> : <Play size={14} />}
+            </button>
+            <input
+              type="range"
+              min={0}
+              max={Math.max(seriesLen - 1, 0)}
+              value={viewIndex}
+              disabled={!data}
+              onChange={(e) => {
+                setPlaying(false)
+                setSelected(Number(e.target.value))
+              }}
+              className="flex-1 accent-rose-500"
+              aria-label="Date"
+            />
+            <span className="text-xs font-mono text-zinc-400 w-24 text-right">
+              {viewDate
+                ? viewDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                : '—'}
+            </span>
+            <button
+              onClick={() => {
+                setPlaying(false)
+                setSelected(null)
+              }}
+              className={`text-xs text-rose-400 hover:text-rose-300 transition-colors ${
+                !data || viewIndex === todayIndex ? 'invisible' : ''
+              }`}
+            >
+              Today
+            </button>
+          </div>
           <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="w-full h-auto" role="img" aria-label="Solar system diagram">
             {TICKS.map((deg) => {
               const cardinal = deg % 90 === 0
