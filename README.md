@@ -11,6 +11,7 @@ The earthquake monitor is the first of several tools and projects hosted here.
 | `/projects` | Project index |
 | `/projects/earthquakes` | EQ26 — Global Earthquake Monitor |
 | `/projects/iss` | ISS Tracker — Live position of the International Space Station |
+| `/projects/planets` | Planetary Orrery — Positions of the planets around the Sun |
 | `/blog` | Blog post index |
 | `/blog/:slug` | Individual blog post |
 
@@ -56,6 +57,29 @@ Position data is sourced from the **Open Notify ISS API** via an AWS Lambda Func
 http://api.open-notify.org/iss-now.json
 ```
 
+## Planetary Orrery
+
+A top-down view of the solar system: the eight planets drawn at their real positions around the Sun, viewed from above the ecliptic. Angles are astronomically exact; orbit distances are compressed (square-root scale) so the inner planets stay visible next to Neptune.
+
+### Features
+
+- **Live orrery** — SVG solar system with a reference ring (30° ticks, 0° at the vernal equinox ♈)
+- **Date scrubber** — slider spanning ±6 months, with a play mode that animates 20 days per second
+- **View toggle** — full-system view, or an inner-planet view that adds the Moon (drawn in its true direction from Earth, at an exaggerated distance for visibility)
+- **Alignment readout** — highlights the tightest grouping of planets within a 60° arc
+- **Info table** — per-planet distance from the Sun (AU) and heliocentric ecliptic longitude
+- **Stale/error states** — banner shown if the upstream API is unreachable
+
+### Data Source
+
+Ephemeris data comes from the **NASA JPL Horizons API** (free, no API key):
+
+```
+https://ssd.jpl.nasa.gov/api/horizons.api
+```
+
+An AWS Lambda (source in `lambda/planet-positions/`) queries Horizons once per day for daily positions of the planets and Moon across a ±6-month window, parses the ephemeris text blocks, and serves the result as compact JSON. Two upstream quirks it absorbs: Horizons returns 503s for concurrent requests (queries run sequentially), and ad blockers block `*.lambda-url.on.aws` fetches, so the browser reaches the Lambda through the same-origin path `/api/planets` — a Vite proxy in dev, an Amplify 200 rewrite in production.
+
 ## Blog
 
 Markdown-based blog sourced from `.md` files in `src/content/blog/`. Adding a post is as simple as dropping a `.md` file with the required frontmatter and rebuilding.
@@ -83,7 +107,7 @@ description: One-line summary shown on the index page.
 | Map | [Leaflet](https://leafletjs.com/) + [react-leaflet](https://react-leaflet.js.org/) |
 | Markdown | [marked](https://marked.js.org/) |
 | Icons | [Lucide React](https://lucide.dev/) |
-| Backend proxy | AWS Lambda (Node.js 24.x) via Function URL |
+| Backend proxy | AWS Lambda (Node.js) via Function URL / Amplify rewrite |
 
 ## Prerequisites
 
@@ -122,6 +146,9 @@ npm run lint
 ## Project Structure
 
 ```
+lambda/
+└── planet-positions/
+    └── index.mjs            # planetPositions Lambda — JPL Horizons proxy + daily cache
 src/
 ├── components/
 │   ├── EventsList.tsx       # Scrollable list of individual earthquake events
@@ -143,6 +170,7 @@ src/
 │   ├── EQPage.tsx           # Earthquake monitor dashboard
 │   ├── ISSPage.tsx          # ISS live tracker
 │   ├── LandingPage.tsx      # Personal home page
+│   ├── PlanetsPage.tsx      # Planetary orrery
 │   └── ProjectsPage.tsx     # Project index
 ├── App.tsx                  # Route definitions
 ├── main.tsx                 # React entry point, QueryClientProvider setup
