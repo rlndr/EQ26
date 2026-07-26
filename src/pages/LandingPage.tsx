@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
-import heroImage from '../assets/hero.png'
+import DecoPortal from '../components/DecoPortal'
 
 export default function LandingPage() {
   const navigate = useNavigate()
@@ -9,30 +8,28 @@ export default function LandingPage() {
     <div className="relative min-h-[calc(100vh-57px)] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
       {/* Hero background */}
       <div className="absolute inset-0 z-0">
-        <img
-          src={heroImage}
-          alt=""
-          className="w-full h-full object-cover opacity-20"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/60 via-zinc-950/40 to-zinc-950" />
+        <DecoPortal />
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/40 via-transparent to-zinc-950" />
       </div>
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center gap-6 max-w-2xl">
-        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight">
-          <span className="text-zinc-100">land</span><span className="text-rose-500">3</span><span className="text-zinc-100">r.net</span>
-        </h1>
+        {/* The name is drawn in the DecoPortal artwork, which is decorative; this carries it
+            to screen readers and gives the page its heading */}
+        <h1 className="sr-only">land3r.net</h1>
 
-        <p className="text-zinc-400 text-base sm:text-lg leading-relaxed max-w-xl">
+        <p className="text-zinc-400 text-base sm:text-lg leading-relaxed max-w-lg">
           A personal corner of the internet. Tools, experiments, and projects built for curiosity.
         </p>
 
+        {/* Double-line rose plate, echoing the portal's banded arch */}
         <button
           onClick={() => navigate('/projects')}
-          className="mt-2 flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
+          className="group mt-2 border border-rose-500/60 p-[3px] transition-colors hover:border-rose-400"
         >
-          View Projects
-          <ArrowRight size={18} />
+          <span className="block border border-rose-500/50 px-8 py-2.5 text-sm sm:text-base font-medium uppercase tracking-[0.25em] indent-[0.25em] text-rose-400 transition-colors group-hover:border-rose-400 group-hover:bg-rose-500/15">
+            Projects
+          </span>
         </button>
       </div>
     </div>

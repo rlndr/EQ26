@@ -37,7 +37,7 @@ export default function ProjectsPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-zinc-100 mb-2">Projects</h1>
+      <h1 className="text-3xl font-bold text-brass mb-2">Projects</h1>
       <p className="text-zinc-400 mb-10">A collection of tools and experiments.</p>
 
       <div className="grid gap-4 sm:grid-cols-2">

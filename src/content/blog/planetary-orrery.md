@@ -14,7 +14,7 @@ You can't draw the solar system to scale and have it be useful — Neptune orbit
 
 ## A bug worth remembering
 
-The data pipeline seemed simple — a Lambda queries Horizons daily, caches the results, and serves them as compact JSON — but two failures taught me things the docs didn't:
+The data pipeline seemed simple — a Lambda queries Horizons daily, caches the results, and serves them as compact JSON.
 
 **Horizons hates a crowd.** Fire eight requests at it concurrently and most come back as HTTP 503s. Query it one planet at a time and it's perfectly happy. The lesson: when your requests fan out to one upstream, sequential isn't always the naive option — sometimes it's the only one that works.
 
