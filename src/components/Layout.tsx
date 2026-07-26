@@ -1,5 +1,11 @@
 import { Outlet, NavLink } from 'react-router-dom'
 
+const NAV = [
+  { to: '/', label: 'Home', end: true },
+  { to: '/projects', label: 'Projects' },
+  { to: '/blog', label: 'Blog' },
+]
+
 export default function Layout() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
@@ -7,48 +13,27 @@ export default function Layout() {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <NavLink to="/" className="hover:opacity-80 transition-opacity">
             <span className="text-lg font-bold tracking-tight">
-              <span className="text-zinc-100">land</span><span className="text-rose-500">3</span><span className="text-zinc-100">r.net</span>
+              <span className="text-brass">LAND</span><span className="text-rose-500">3</span><span className="text-brass">R.net</span>
             </span>
           </NavLink>
 
           <nav className="flex items-center gap-1">
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) =>
-                `px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-zinc-800 text-zinc-100'
-                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50'
-                }`
-              }
-            >
-              Home
-            </NavLink>
-            <NavLink
-              to="/projects"
-              className={({ isActive }) =>
-                `px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-zinc-800 text-zinc-100'
-                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50'
-                }`
-              }
-            >
-              Projects
-            </NavLink>
-            <NavLink
-              to="/blog"
-              className={({ isActive }) =>
-                `px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-zinc-800 text-zinc-100'
-                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50'
-                }`
-              }
-            >
-              Blog
-            </NavLink>
+            {NAV.map(({ to, label, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  `px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-brass/10 text-brass ring-1 ring-inset ring-brass-dark/40'
+                      : 'text-zinc-400 hover:text-brass hover:bg-brass/5'
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
           </nav>
         </div>
       </header>
@@ -57,9 +42,12 @@ export default function Layout() {
         <Outlet />
       </div>
 
-      <footer className="border-t border-zinc-900 py-4">
-        <div className="max-w-6xl mx-auto px-4 text-center text-xs text-zinc-700">
-          land<span className="text-rose-500">3</span>r.net
+      <footer className="border-t border-brass-dark/20 py-5">
+        <div className="max-w-6xl mx-auto px-4 flex items-center justify-center gap-3 text-xs tracking-[0.2em] text-brass-dark/75">
+          <span aria-hidden="true" className="h-px w-8 bg-brass-dark/30" />
+          {/* One flex item, so gap-3 spaces only the rules and not the letters */}
+          <span className="-mr-[0.2em]">LAND<span className="text-rose-500/80">3</span>R.net</span>
+          <span aria-hidden="true" className="h-px w-8 bg-brass-dark/30" />
         </div>
       </footer>
     </div>

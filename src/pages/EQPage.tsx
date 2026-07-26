@@ -87,7 +87,7 @@ export default function EQPage() {
     <main className="max-w-6xl mx-auto px-4 py-5 flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-baseline gap-2">
-          <h1 className="text-xl font-semibold text-zinc-100">
+          <h1 className="text-xl font-semibold text-brass">
             {MONTH_NAMES[month - 1]} {year}
           </h1>
           <span className="text-sm text-zinc-500">Monthly Seismic Report — M5.0+</span>

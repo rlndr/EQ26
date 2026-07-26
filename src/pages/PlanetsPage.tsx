@@ -156,7 +156,7 @@ export default function PlanetsPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
       <div className="flex items-center justify-between mb-2">
-        <h1 className="text-3xl font-bold text-zinc-100">Planetary Orrery</h1>
+        <h1 className="text-3xl font-bold text-brass">Planetary Orrery</h1>
         {data?.stale && (
           <span className="text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-1 rounded">
             Data may be delayed

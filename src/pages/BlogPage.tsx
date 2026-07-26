@@ -9,7 +9,7 @@ export default function BlogPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-zinc-100 mb-2">Blog</h1>
+      <h1 className="text-3xl font-bold text-brass mb-2">Blog</h1>
       <p className="text-zinc-400 mb-10">Thoughts and notes.</p>
 
       {posts.length === 0 ? (
