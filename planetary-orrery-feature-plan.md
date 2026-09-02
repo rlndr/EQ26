@@ -104,5 +104,7 @@ If Horizons is unreachable, serve the last cached payload with `"stale": true` �
   (served geocentric at 6 decimals from the Lambda; drawn in its true direction from Earth
   at an exaggerated distance, since ~0.0026 AU is invisible at orrery scale)
 - Include Pluto or a famous comet
-- "Next great alignment" finder — scan future ephemeris for tight clusters
+- ~~"Next great alignment" finder~~ — **dropped 2026-07-19.** Prototyped and rejected: the events
+  are too rare to justify the feature (one sub-40° gathering before 2050; all 8 planets never
+  closer than 111°). Findings kept in `alignment-finder-feature-plan.md`.
 - Geocentric night-sky view ("which planets can I see tonight?") — different projection, same data
