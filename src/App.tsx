@@ -7,6 +7,7 @@ import BlogPage from './pages/BlogPage'
 import BlogPostPage from './pages/BlogPostPage'
 import ISSPage from './pages/ISSPage'
 import PlanetsPage from './pages/PlanetsPage'
+import ArkanoidPage from './pages/ArkanoidPage'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="earthquakes" element={<EQPage />} />
           <Route path="iss" element={<ISSPage />} />
           <Route path="planets" element={<PlanetsPage />} />
+          <Route path="arkanoid" element={<ArkanoidPage />} />
         </Route>
         <Route path="blog">
           <Route index element={<BlogPage />} />

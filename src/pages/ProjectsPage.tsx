@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, ArrowRight, BookOpen, Orbit, Satellite } from 'lucide-react'
+import { Activity, ArrowRight, BookOpen, Gamepad2, Orbit, Satellite } from 'lucide-react'
 
 const projects = [
   {
@@ -22,6 +22,13 @@ const projects = [
     icon: Orbit,
     accent: 'text-rose-500',
     href: '/projects/planets',
+  },
+  {
+    title: 'Arkanoid',
+    description: 'A block breaker after the 1986 Taito original. Vaus paddle, angled ball physics, silver and gold bricks, and falling power-up capsules.',
+    icon: Gamepad2,
+    accent: 'text-rose-500',
+    href: '/projects/arkanoid',
   },
   {
     title: 'Blog',

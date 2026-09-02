@@ -12,6 +12,7 @@ The earthquake monitor is the first of several tools and projects hosted here.
 | `/projects/earthquakes` | EQ26 — Global Earthquake Monitor |
 | `/projects/iss` | ISS Tracker — Live position of the International Space Station |
 | `/projects/planets` | Planetary Orrery — Positions of the planets around the Sun |
+| `/projects/arkanoid` | Arkanoid — A block-breaker arcade game |
 | `/blog` | Blog post index |
 | `/blog/:slug` | Individual blog post |
 
@@ -79,6 +80,24 @@ https://ssd.jpl.nasa.gov/api/horizons.api
 ```
 
 An AWS Lambda (source in `lambda/planet-positions/`) queries Horizons once per day for daily positions of the planets and Moon across a ±6-month window, parses the ephemeris text blocks, and serves the result as compact JSON. Two upstream quirks it absorbs: Horizons returns 503s for concurrent requests (queries run sequentially), and ad blockers block `*.lambda-url.on.aws` fetches, so the browser reaches the Lambda through the same-origin path `/api/planets` — a Vite proxy in dev, an Amplify 200 rewrite in production.
+
+## Arkanoid
+
+A block breaker after the 1986 Taito original. The Vaus paddle is driven by mouse or arrow keys; where the ball strikes the paddle sets the angle it leaves at. Silver bricks take multiple hits, gold cannot be broken, and capsules fall for a wider paddle (E), a slower ball (S) or three balls at once (D).
+
+### Features
+
+- **Canvas 2D renderer** at a fixed 224×288 logical resolution, integer-scaled to fit and sized for `devicePixelRatio`
+- **Fixed 120 Hz timestep** with an accumulator, so the game plays identically on a 60 Hz and a 144 Hz display, with render interpolation between ticks
+- **Five levels**, authored as string grids in `levels.ts`, looping with rising ball speed
+- **Power-up capsules** — one falling at a time, effects lasting until the ball is lost
+- **High score** kept in `localStorage`, and synthesised WebAudio blips with a mute toggle
+
+### Architecture note
+
+The game deliberately does **not** hold its state in React. Game state is a plain mutable object stepped from a `requestAnimationFrame` loop, and the score and lives are drawn onto the canvas — driving React at 60 fps would spend the frame budget on reconciliation and hand frame timing to React's scheduler. React mounts the canvas and re-renders only on discrete events (pause, level complete, game over).
+
+No backend, no API and no dependencies beyond what the site already ships; the whole game adds roughly 34 KB to the bundle.
 
 ## Blog
 
@@ -160,12 +179,14 @@ src/
 ├── content/
 │   └── blog/                # Markdown blog posts (drop .md files here)
 ├── lib/
+│   ├── arkanoid/            # Game engine: constants, physics, levels, render, audio
 │   ├── api.ts               # USGS API fetch, region parsing, magnitude banding
 │   ├── blog.ts              # Blog post loader and frontmatter parser
 │   ├── process.ts           # Data aggregation and transformation
 │   └── utils.ts             # Tailwind class merge utility
 ├── pages/
 │   ├── BlogPage.tsx         # Blog post index
+│   ├── ArkanoidPage.tsx     # Arkanoid game (canvas host + overlays)
 │   ├── BlogPostPage.tsx     # Individual blog post renderer
 │   ├── EQPage.tsx           # Earthquake monitor dashboard
 │   ├── ISSPage.tsx          # ISS live tracker
