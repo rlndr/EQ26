@@ -13,6 +13,7 @@ The earthquake monitor is the first of several tools and projects hosted here.
 | `/projects/iss` | ISS Tracker — Live position of the International Space Station |
 | `/projects/planets` | Planetary Orrery — Positions of the planets around the Sun |
 | `/projects/arkanoid` | Arkanoid — A block-breaker arcade game |
+| `/projects/speaker-box` | Speaker Box Designer — Loudspeaker enclosure calculator |
 | `/blog` | Blog post index |
 | `/blog/:slug` | Individual blog post |
 
@@ -99,6 +100,24 @@ The game deliberately does **not** hold its state in React. Game state is a plai
 
 No backend, no API and no dependencies beyond what the site already ships; the whole game adds roughly 34 KB to the bundle.
 
+## Speaker Box Designer
+
+Sizes a loudspeaker enclosure. Enter the outside dimensions and panel thickness (3/4 in or 1 in) and it works out the interior volume — every dimension loses two panel thicknesses — then subtracts driver, port and bracing displacement to give the **net** volume the driver actually sees.
+
+### Features
+
+- **Sloped baffle.** Optionally lean the front baffle back by up to 45°, making the box a wedge. The cavity maths accounts for a leaning panel eating `t/cos θ` of depth rather than `t`, and the 3D view, cut list and validation all follow
+- **Sealed or ported.** For a ported box you specify the ports you will actually build (diameter, length, quantity) and the tool works the standard port equation *backwards* to tell you what frequency the box ends up tuned to, plus how long those ports would need to be to hit the target instead
+- **Driver match.** Enter Vas, Qts and Fs from the spec sheet and it computes the target volume and tuning — sealed via the Qtc alignment, ported via the Small approximations — then grades the design against it
+- **3D preview** built from CSS 3D transforms (no 3D library), with drag-to-rotate and open-top / open-front toggles so the cavity and material thickness are visible
+- **Cut list** with panel sizes and total board area
+
+### Notes
+
+Alignment figures are the standard published approximations rather than a full transfer-function simulation — enough to design around, but WinISD is the tool for final work. Vas takes litres or ft³, since most drivers publish litres and a mix-up is a 28x error. Assumes a plain rectangular box.
+
+The maths lives in `src/lib/enclosure/` as pure functions, with `verify.ts` asserting every worked example from the plan — including a cut-list check that panel material plus cavity exactly refills the outer shell, and a cross-check of the sloped-baffle volume against brute-force numerical integration.
+
 ## Blog
 
 Markdown-based blog sourced from `.md` files in `src/content/blog/`. Adding a post is as simple as dropping a `.md` file with the required frontmatter and rebuilding.
@@ -180,6 +199,7 @@ src/
 │   └── blog/                # Markdown blog posts (drop .md files here)
 ├── lib/
 │   ├── arkanoid/            # Game engine: constants, physics, levels, render, audio
+│   ├── enclosure/           # Speaker box maths: volume, ports, alignment, cut list
 │   ├── api.ts               # USGS API fetch, region parsing, magnitude banding
 │   ├── blog.ts              # Blog post loader and frontmatter parser
 │   ├── process.ts           # Data aggregation and transformation
@@ -187,6 +207,7 @@ src/
 ├── pages/
 │   ├── BlogPage.tsx         # Blog post index
 │   ├── ArkanoidPage.tsx     # Arkanoid game (canvas host + overlays)
+│   ├── SpeakerBoxPage.tsx   # Speaker enclosure designer
 │   ├── BlogPostPage.tsx     # Individual blog post renderer
 │   ├── EQPage.tsx           # Earthquake monitor dashboard
 │   ├── ISSPage.tsx          # ISS live tracker

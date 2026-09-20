@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, ArrowRight, BookOpen, Gamepad2, Orbit, Satellite } from 'lucide-react'
+import { Activity, ArrowRight, BookOpen, Gamepad2, Orbit, Satellite, Speaker } from 'lucide-react'
 
 const projects = [
   {
@@ -29,6 +29,13 @@ const projects = [
     icon: Gamepad2,
     accent: 'text-rose-500',
     href: '/projects/arkanoid',
+  },
+  {
+    title: 'Speaker Box Designer',
+    description: 'Size a loudspeaker enclosure: interior volume from outside dimensions and panel thickness, port tuning, a driver match check against Thiele-Small parameters, and a cut list.',
+    icon: Speaker,
+    accent: 'text-rose-500',
+    href: '/projects/speaker-box',
   },
   {
     title: 'Blog',
