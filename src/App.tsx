@@ -8,6 +8,7 @@ import BlogPostPage from './pages/BlogPostPage'
 import ISSPage from './pages/ISSPage'
 import PlanetsPage from './pages/PlanetsPage'
 import ArkanoidPage from './pages/ArkanoidPage'
+import SpeakerBoxPage from './pages/SpeakerBoxPage'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="iss" element={<ISSPage />} />
           <Route path="planets" element={<PlanetsPage />} />
           <Route path="arkanoid" element={<ArkanoidPage />} />
+          <Route path="speaker-box" element={<SpeakerBoxPage />} />
         </Route>
         <Route path="blog">
           <Route index element={<BlogPage />} />
