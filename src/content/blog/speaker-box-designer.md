@@ -5,9 +5,9 @@ description: Sizing a speaker enclosure properly — interior volume, port tunin
 ---
 Years ago, I was very into the car audio scene. Building boxes for a subwoofer was always a fun challenge. Knowing the calculations can get a little tricky if you get into details, I wrote one of my first programs to do just this sort of thing. But the only computer I had was my calculator. The HP 48SX. (The sound of trumpets.) It worked and was useful several times.
 
-Today we're raising the bar a little and doing it properly. Today's project is the [Speaker Box Designer](/projects/speaker-box).
+Today we're raising the bar a little and doing it properly. Behold, the [Speaker Box Designer](/projects/speaker-box).
 
-The problem is easy to state and easy to get wrong. Especially if the front has an angled face. A driver only sounds right in an enclosure of roughly the correct interior volume — and the interior is never the size you cut the panels to.
+The problem is easy to state and easy to get wrong, especially if the front has an angled face. A driver only sounds right in an enclosure of roughly the correct interior volume — and the interior is never the size you cut the panels to.
 
 ## How to use it
 
