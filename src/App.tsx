@@ -9,6 +9,7 @@ import ISSPage from './pages/ISSPage'
 import PlanetsPage from './pages/PlanetsPage'
 import ArkanoidPage from './pages/ArkanoidPage'
 import SpeakerBoxPage from './pages/SpeakerBoxPage'
+import TimeDilationPage from './pages/TimeDilationPage'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="planets" element={<PlanetsPage />} />
           <Route path="arkanoid" element={<ArkanoidPage />} />
           <Route path="speaker-box" element={<SpeakerBoxPage />} />
+          <Route path="time-dilation" element={<TimeDilationPage />} />
         </Route>
         <Route path="blog">
           <Route index element={<BlogPage />} />

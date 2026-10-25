@@ -14,6 +14,7 @@ The earthquake monitor is the first of several tools and projects hosted here.
 | `/projects/planets` | Planetary Orrery — Positions of the planets around the Sun |
 | `/projects/arkanoid` | Arkanoid — A block-breaker arcade game |
 | `/projects/speaker-box` | Speaker Box Designer — Loudspeaker enclosure calculator |
+| `/projects/time-dilation` | Time Dilation Explorer — Interactive special relativity lab |
 | `/blog` | Blog post index |
 | `/blog/:slug` | Individual blog post |
 
@@ -118,6 +119,21 @@ Alignment figures are the standard published approximations rather than a full t
 
 The maths lives in `src/lib/enclosure/` as pure functions, with `verify.ts` asserting every worked example from the plan — including a cut-list check that panel material plus cavity exactly refills the outer shell, and a cross-check of the sloped-baffle volume against brute-force numerical integration.
 
+## Time Dilation Explorer
+
+An interactive special relativity lab exploring how moving close to the speed of light ($c = 299,792.458\text{ km/s}$) slows the passage of time for a high-speed traveler relative to a stationary observer on Earth.
+
+### Features
+
+- **Velocity & ultra-relativistic zoom** — slider from rest up to `0.9999c`, benchmarks from the Parker Solar Probe (`0.00064c`) to `0.9999c`, and a logarithmic zoom mode for dialing "the nines" (`0.90c` to `0.99999c`, $\gamma \approx 223.6$)
+- **Live dual-frame clocks** — side-by-side Earth and spaceship analog/digital clocks with simulation speed multipliers (`1×` to `1 hr/s`), starfield streaks, and a 60 BPM proper-time heartbeat rhythm
+- **Photon light clock & Lorentz curve** — split-screen Canvas 2D animation comparing vertical photon bounces in the ship's rest frame against the diagonal sawtooth path seen from Earth, paired with an adaptive $\gamma(v/c)$ curve
+- **Cosmic journey & Twin Paradox calculator** — solve voyages by ship time ($\Delta t'$), Earth time ($\Delta t$), or light-year distance with presets from Alpha Centauri (`4.37 ly`) to Andromeda (`2.54M ly`)
+
+### Architecture note
+
+Follows the Arkanoid and Speaker Box patterns: pure relativistic formulas and mission solvers live in `src/lib/relativity/` with a `verify.ts` harness, while the 60 fps clock and canvas animations step from a `requestAnimationFrame` loop writing directly to DOM/SVG refs and Canvas 2D contexts without per-frame React state updates.
+
 ## Blog
 
 Markdown-based blog sourced from `.md` files in `src/content/blog/`. Adding a post is as simple as dropping a `.md` file with the required frontmatter and rebuilding.
@@ -200,6 +216,7 @@ src/
 ├── lib/
 │   ├── arkanoid/            # Game engine: constants, physics, levels, render, audio
 │   ├── enclosure/           # Speaker box maths: volume, ports, alignment, cut list
+│   ├── relativity/          # Special relativity maths, slider curves, cosmic journey solver
 │   ├── api.ts               # USGS API fetch, region parsing, magnitude banding
 │   ├── blog.ts              # Blog post loader and frontmatter parser
 │   ├── process.ts           # Data aggregation and transformation
@@ -208,6 +225,7 @@ src/
 │   ├── BlogPage.tsx         # Blog post index
 │   ├── ArkanoidPage.tsx     # Arkanoid game (canvas host + overlays)
 │   ├── SpeakerBoxPage.tsx   # Speaker enclosure designer
+│   ├── TimeDilationPage.tsx # Special relativity time dilation explorer
 │   ├── BlogPostPage.tsx     # Individual blog post renderer
 │   ├── EQPage.tsx           # Earthquake monitor dashboard
 │   ├── ISSPage.tsx          # ISS live tracker
