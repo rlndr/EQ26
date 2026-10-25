@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, ArrowRight, BookOpen, Gamepad2, Orbit, Satellite, Speaker } from 'lucide-react'
+import { Activity, ArrowRight, BookOpen, Clock, Gamepad2, Orbit, Satellite, Speaker } from 'lucide-react'
 
 const projects = [
   {
@@ -36,6 +36,13 @@ const projects = [
     icon: Speaker,
     accent: 'text-rose-500',
     href: '/projects/speaker-box',
+  },
+  {
+    title: 'Time Dilation Explorer',
+    description: 'Special relativity lab: dial velocity up to 0.99999c, compare stationary Earth and moving ship clocks live, watch a split-frame photon light clock, and calculate cosmic journeys.',
+    icon: Clock,
+    accent: 'text-rose-500',
+    href: '/projects/time-dilation',
   },
   {
     title: 'Blog',
