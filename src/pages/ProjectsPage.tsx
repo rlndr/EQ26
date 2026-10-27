@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, ArrowRight, BookOpen, Clock, Gamepad2, Orbit, Satellite, Speaker } from 'lucide-react'
+import { Activity, ArrowRight, BookOpen, Clock, Gamepad2, MonitorPlay, Orbit, Satellite, Speaker } from 'lucide-react'
 
 const projects = [
   {
@@ -43,6 +43,13 @@ const projects = [
     icon: Clock,
     accent: 'text-rose-500',
     href: '/projects/time-dilation',
+  },
+  {
+    title: 'ScreenRipper',
+    description: 'A browser screensaver: ten animated patterns from tumbling wireframe solids to GPU fractal zooms. Number keys pick a pattern, F goes fullscreen, and it moves on by itself every minute.',
+    icon: MonitorPlay,
+    accent: 'text-rose-500',
+    href: '/projects/screenripper',
   },
   {
     title: 'Blog',

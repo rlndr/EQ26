@@ -15,6 +15,7 @@ The earthquake monitor is the first of several tools and projects hosted here.
 | `/projects/arkanoid` | Arkanoid — A block-breaker arcade game |
 | `/projects/speaker-box` | Speaker Box Designer — Loudspeaker enclosure calculator |
 | `/projects/time-dilation` | Time Dilation Explorer — Interactive special relativity lab |
+| `/projects/screenripper` | ScreenRipper — Fullscreen animated screensaver patterns |
 | `/blog` | Blog post index |
 | `/blog/:slug` | Individual blog post |
 
@@ -134,6 +135,46 @@ An interactive special relativity lab exploring how moving close to the speed of
 
 Follows the Arkanoid and Speaker Box patterns: pure relativistic formulas and mission solvers live in `src/lib/relativity/` with a `verify.ts` harness, while the 60 fps clock and canvas animations step from a `requestAnimationFrame` loop writing directly to DOM/SVG refs and Canvas 2D contexts without per-frame React state updates.
 
+## ScreenRipper
+
+A screensaver for the browser: ten animated patterns, one per number key, cycling on their own every minute when no key is pressed. `F` takes the stage fullscreen without the site header or footer, `Space` pauses.
+
+| Key | Pattern | Renderer |
+|---|---|---|
+| `1` | Polyhedra — the five Platonic solids tumbling, each with its dual inside | Canvas 2D |
+| `2` | Starfield — warp-speed streaks from a drifting vanishing point | Canvas 2D |
+| `3` | Mystify — the Windows classic, two bouncing quadrilaterals with echoes | Canvas 2D |
+| `4` | Spirograph — three pens tracing a hypotrochoid whose gears drift | Canvas 2D |
+| `5` | Fractal Tree — grows, sways in a travelling wind, blossoms, regrows | Canvas 2D |
+| `6` | Flow Field — particles painting a noise field, three paintings a minute | Canvas 2D |
+| `7` | Hypercube — a tesseract turning through 4D | Canvas 2D |
+| `8` | Mandelbrot Zoom — a 60-second dive into Seahorse Valley | WebGL2 shader |
+| `9` | Julia Morph — a Julia set whose constant orbits the Mandelbrot boundary | WebGL2 shader |
+| `0` | Tunnel — a kaleidoscope tunnel flying forward | WebGL2 shader |
+
+### Features
+
+- **Two renderers** on two stacked canvases, because a canvas cannot switch context type once it has one. Vector patterns use Canvas 2D; per-pixel fractals use hand-written WebGL2 fragment shaders over a single full-screen triangle (no three.js)
+- **Fullscreen on the stage element**, not the document, so only the pattern fills the screen. While fullscreen it holds a Screen Wake Lock (so the OS screensaver doesn't kick in over it) and hides an idle cursor after 2 s
+- **Auto-cycle** every 60 s without a keypress, timed on the animation loop's own clock so a hidden tab never jumps ahead; fades to black between patterns
+- **Shader pixel budget** — the WebGL canvas is capped at 1080p worth of pixels and scaled up, so a 4K display costs no more than a 1080p one
+- **Reduced motion** — with `prefers-reduced-motion`, patterns run at 0.4× while the cycle keeps real time
+- **Failure is visible** — a shader that won't compile, or a pattern that throws, shows its error on the stage with the offending source line, and a lost WebGL context is rebuilt
+
+### Notes
+
+The Mandelbrot zoom stops at **1,500×**. That is measured, not guessed: GPU shaders use 32-bit floats, and run against 64-bit, more than 5% of pixels get a visibly wrong colour past about 1,800×, long before the image turns blocky (~100,000×).
+
+No pattern fades by drawing translucent black over the previous frame. On an 8-bit canvas that never reaches black, leaves a ghost whose brightness depends on refresh rate, and flickers if done in steps. Patterns clear every frame, and Flow Field's end-of-painting fade uses the canvas element's opacity instead.
+
+### Verifying
+
+```bash
+node scripts/verify-screenripper.mjs
+```
+
+Runs `src/lib/screenripper/verify.ts` (key map, cycle timing across 30–240 Hz, wake lock races, pixel budget, every 2D pattern's real frame code against a recording context at four screen shapes, solid and tesseract geometry, the Mandelbrot float32 limit) and then compiles every `.glsl` file with `glslangValidator` (`sudo apt install glslang-tools`). Exits non-zero on any failure.
+
 ## Blog
 
 Markdown-based blog sourced from `.md` files in `src/content/blog/`. Adding a post is as simple as dropping a `.md` file with the required frontmatter and rebuilding.
@@ -159,6 +200,7 @@ description: One-line summary shown on the index page.
 | Styling | [Tailwind CSS](https://tailwindcss.com/) v3 (dark mode) |
 | Charts | [Recharts](https://recharts.org/) v3 |
 | Map | [Leaflet](https://leafletjs.com/) + [react-leaflet](https://react-leaflet.js.org/) |
+| Graphics | Canvas 2D and WebGL2 (built into the browser, no library) |
 | Markdown | [marked](https://marked.js.org/) |
 | Icons | [Lucide React](https://lucide.dev/) |
 | Backend proxy | AWS Lambda (Node.js) via Function URL / Amplify rewrite |
@@ -203,6 +245,8 @@ npm run lint
 lambda/
 └── planet-positions/
     └── index.mjs            # planetPositions Lambda — JPL Horizons proxy + daily cache
+scripts/
+└── verify-screenripper.mjs  # ScreenRipper checks + GLSL compile
 src/
 ├── components/
 │   ├── EventsList.tsx       # Scrollable list of individual earthquake events
@@ -217,6 +261,7 @@ src/
 │   ├── arkanoid/            # Game engine: constants, physics, levels, render, audio
 │   ├── enclosure/           # Speaker box maths: volume, ports, alignment, cut list
 │   ├── relativity/          # Special relativity maths, slider curves, cosmic journey solver
+│   ├── screenripper/        # Screensaver stage, timing, WebGL helpers, wake lock, effects/
 │   ├── api.ts               # USGS API fetch, region parsing, magnitude banding
 │   ├── blog.ts              # Blog post loader and frontmatter parser
 │   ├── process.ts           # Data aggregation and transformation
@@ -226,6 +271,7 @@ src/
 │   ├── ArkanoidPage.tsx     # Arkanoid game (canvas host + overlays)
 │   ├── SpeakerBoxPage.tsx   # Speaker enclosure designer
 │   ├── TimeDilationPage.tsx # Special relativity time dilation explorer
+│   ├── ScreenRipperPage.tsx # Fullscreen screensaver patterns
 │   ├── BlogPostPage.tsx     # Individual blog post renderer
 │   ├── EQPage.tsx           # Earthquake monitor dashboard
 │   ├── ISSPage.tsx          # ISS live tracker

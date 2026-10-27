@@ -10,6 +10,7 @@ import PlanetsPage from './pages/PlanetsPage'
 import ArkanoidPage from './pages/ArkanoidPage'
 import SpeakerBoxPage from './pages/SpeakerBoxPage'
 import TimeDilationPage from './pages/TimeDilationPage'
+import ScreenRipperPage from './pages/ScreenRipperPage'
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="arkanoid" element={<ArkanoidPage />} />
           <Route path="speaker-box" element={<SpeakerBoxPage />} />
           <Route path="time-dilation" element={<TimeDilationPage />} />
+          <Route path="screenripper" element={<ScreenRipperPage />} />
         </Route>
         <Route path="blog">
           <Route index element={<BlogPage />} />
