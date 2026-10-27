@@ -17,7 +17,7 @@ The patterns fall into two kinds, and they need different renderers:
 | Kind | Examples | Renderer | Why |
 |---|---|---|---|
 | Vector | Wireframe solids, starfield, spirograph, fractal tree | **Canvas 2D** (as Arkanoid) | A few thousand lines and paths per frame is easy for Canvas 2D |
-| Per-pixel | Mandelbrot, Julia, plasma, tunnel | **WebGL2 fragment shaders** | Out of reach for Canvas 2D at full screen |
+| Per-pixel | Mandelbrot, Julia, tunnel | **WebGL2 fragment shaders** | Out of reach for Canvas 2D at full screen |
 
 The per-pixel case is what decides it. A 1080p screen is 2.07M pixels and 4K is 8.3M. A
 Mandelbrot frame at around 50 iterations per pixel is roughly 100M iterations, or 6 billion a
@@ -95,33 +95,45 @@ While fullscreen:
 
 ## 2. The patterns
 
-Key map agreed 2026-10-26: six vector patterns, then four shader patterns. Swapping slots later
-is a one-line change in `registry.ts`.
+Key map agreed 2026-10-26: seven vector patterns, then three shader patterns. Hypercube replaced
+Plasma on `7` the same day (Plasma "isn't very interesting"). Swapping slots later is a one-line
+change in `registry.ts`.
 
 | Key | Pattern | Renderer | Notes |
 |---|---|---|---|
-| `1` | **Polyhedra** | 2D | Wireframe Platonic solids tumbling on three axes, morphing between shapes; hand-written perspective projection |
+| `1` | **Polyhedra** | 2D | Wireframe Platonic solids tumbling on three axes, 12 s each so all five fill one minute, each with its dual turning inside it. The solids have different vertex counts, so the hand-over is an edge dissolve (old edges shrink to their midpoints as new ones grow) rather than a true morph |
 | `2` | **Starfield** | 2D | Warp-speed streaks from a vanishing point that drifts slowly |
 | `3` | **Mystify** | 2D | The Windows classic: two bouncing quadrilaterals with colour-shifting trails |
 | `4` | **Spirograph** | 2D | Hypotrochoid curves drawn live, parameters drifting so the figure keeps changing |
 | `5` | **Fractal Tree** | 2D | Recursive branching that grows from a seed, sways in a wind field, then regrows with new angles |
-| `6` | **Flow Field** | 2D | ~5,000 particles following a noise field, with fading trails |
-| `7` | **Plasma** | GL | Classic demoscene sine plasma with a slowly rotating palette |
-| `8` | **Mandelbrot Zoom** | GL | Continuous zoom into the Seahorse Valley with smooth colouring |
+| `6` | **Flow Field** | 2D | 4,000 particles following a noise field, building up an ink painting over 18 s, then fading for the next field (three per minute). Changed from fading trails in step 5: on an 8-bit canvas a long fade sticks at a visible grey ghost. The 2 s end fade is the canvas element's CSS opacity (new optional `opacity` on effects), because every way of fading the pixels themselves either left a ghost, stepped, or ran at a different pace per refresh rate |
+| `7` | **Hypercube** | 2D | Tesseract turning through 4D (its inner cube keeps turning inside out) with faint glass in its 24 square faces, cleared every frame. Swinging panes and trails were tried and removed for flicker (2026-10-26; reasons in `hypercube.ts`) |
+| `8` | **Mandelbrot Zoom** | GL | Continuous zoom into the Seahorse Valley with smooth colouring, 1× to 1,500× in one 60 s dive (measured limit, see below) |
 | `9` | **Julia Morph** | GL | Julia set whose constant `c` orbits the Mandelbrot boundary, so the shape keeps changing |
 | `0` | **Tunnel** | GL | Kaleidoscope tunnel flying forward through a mirrored, twisting pattern |
 
 ### The Mandelbrot zoom has a depth limit, and it fits the minute
 
-GPU shaders use 32-bit floats: about 7 significant digits. At around −0.74 on the real axis,
-adjacent representable numbers are ~6×10⁻⁸ apart. Across 1920 pixels the view stops resolving
-cleanly at roughly **5,000× magnification**. Past that, pixels collapse into blocks.
+GPU shaders use 32-bit floats: about 7 significant digits. The plan estimated the limit at about
+5,000×, from when neighbouring pixels collapse onto the same number. **Measured in step 6, that
+estimate was wrong in the optimistic direction**, because blocking is not what fails first:
 
+| Zoom | Pixels with a visibly different colour (float32 vs float64) | Distinct pixel values |
+|---|---|---|
+| 1,000× | 3.0% | 100% |
+| 1,600× | 4.4% | 100% |
+| 2,000× | 6.2% | 100% |
+| 10,000× | 17.8% | 100% |
+| 100,000× | 29.1% | 39% (blocks) |
+
+Near the edge of the set, rounding error is amplified by every iteration, so the escape count
+goes wrong long before pixels merge. It shows as sparkle along the filaments. The zoom is capped
+at **1,500×**, the deepest point under 5% wrong colours.
+
+A dive runs exponentially from the whole set to 1,500× over 60 s, so it looks like a constant
+speed and **one dive fills one auto-cycle slot exactly**, fading out and restarting on black.
 Unlimited deep zoom needs emulated double precision or perturbation theory, which is a project of
-its own. For a screensaver the simple answer works: zoom at a constant exponential rate, then fade
-and restart. Reaching about 4,000× in 55 seconds is a rate of `ln(4000)/55 ≈ 0.15` per second, so
-**one zoom fills almost exactly one auto-cycle slot**. The exact limit is not taken on trust:
-`verify.ts` measures it (see §6).
+its own.
 
 ---
 
@@ -189,16 +201,22 @@ src/pages/ScreenRipperPage.tsx        Route, page chrome, stage mount, name toas
 src/lib/screenripper/
   types.ts                            Effect interface
   registry.ts                         The ten effects in key order
-  stage.ts                            Loop, canvases, switching, fades, cycle clock, fullscreen
-  gl.ts                               WebGL2 helpers: compile/link, full-screen triangle, uniforms
-  math.ts                             Seeded RNG, 2D noise, 3D rotation/projection
+  stage.ts                            Loop, canvases, swapping effects, fullscreen (the DOM side)
+  wakelock.ts                         Screen wake lock with its async races handled; testable
+  director.ts                         What shows and when: selection, fades, pause, cycle clock.
+                                      No DOM, so verify.ts drives it frame by frame
+  gl.ts                               WebGL2 helpers: compile/link, full-screen shader effect,
+                                      pixel budget, readable shader errors
+  fullscreen.vert.glsl                The one vertex shader: a screen-covering triangle
+  math.ts                             Seeded RNG, 2D noise, 3D rotation, smoothstep
   effects/
     polyhedra.ts  starfield.ts  mystify.ts  spirograph.ts  tree.ts  flowfield.ts
-    plasma.ts     plasma.frag.glsl
+    hypercube.ts
     mandelbrot.ts mandelbrot.frag.glsl
     julia.ts      julia.frag.glsl
     tunnel.ts     tunnel.frag.glsl
   verify.ts                           Numeric checks, not imported by the app
+scripts/verify-screenripper.mjs       Runs verify.ts, then compiles every .glsl with glslang
 ```
 
 Plus the route in `App.tsx` and a card in `ProjectsPage.tsx` (lucide `MonitorPlay`, which this
@@ -210,30 +228,42 @@ version of lucide-react exports).
 
 Each step can be checked on its own.
 
-1. **Shell:** route, `ProjectsPage` card, page scaffold, stage with both canvases sized correctly,
+1. ✓ **Shell:** route, `ProjectsPage` card, page scaffold, stage with both canvases sized correctly,
    `F` fullscreen on the stage, `fullscreenchange` sync.
-2. **Stage loop and switching:** Effect interface, registry, number keys, fades, name toast,
+2. ✓ **Stage loop and switching:** Effect interface, registry, number keys, fades, name toast,
    60-second auto-cycle on the loop clock, pause. Proven with two trivial placeholder effects, one
    2D and one GL.
-3. **WebGL plumbing:** `gl.ts`, pixel budget, context loss handling, readable shader errors.
-4. **First real pair:** Polyhedra (2D) and Plasma (GL). Both renderers are now proven end to end.
-5. **Remaining 2D:** Starfield, Mystify, Spirograph, Fractal Tree, Flow Field.
-6. **Remaining GL:** Mandelbrot Zoom, Julia Morph, Tunnel.
-7. **Fullscreen polish:** wake lock and its re-request, idle cursor hide, `prefers-reduced-motion`.
-8. **Verify and docs:** `verify.ts`, README entry, and a blog post if you want one.
+3. ✓ **WebGL plumbing:** `gl.ts`, pixel budget, context loss handling, readable shader errors.
+4. ✓ **First real pair:** Polyhedra (2D) and Plasma (GL). Both renderers are now proven end to end.
+   (Plasma was later replaced by Hypercube; Mandelbrot, Julia and Tunnel still prove the GL path.)
+5. ✓ **Remaining 2D:** Starfield, Mystify, Spirograph, Fractal Tree, Flow Field.
+6. ✓ **Remaining GL:** Mandelbrot Zoom, Julia Morph, Tunnel.
+7. ✓ **Fullscreen polish:** wake lock and its re-request, idle cursor hide, `prefers-reduced-motion`.
+8. ✓ **Verify and docs:** `verify.ts` finished (97 checks with the shader compiles), README
+   section, and blog post `src/content/blog/screenripper.md`.
+
+**Built 2026-10-26.** Verified numerically, never watched (no browser rendering in the build
+environment): timing identical across 30–240 Hz, every 2D pattern's real frame code on screen at
+four screen shapes, solid and tesseract geometry, wake lock races, the Mandelbrot float32 limit
+measured at 1,500×, all shaders compiled by glslang. Adds about 37 KB to the bundle (14 KB
+gzipped). Looks, speeds and colours are UNVERIFIED and will need tuning by eye; Mandelbrot is the
+pattern most likely to struggle on integrated graphics.
 
 ---
 
 ## 6. Verification
 
-`src/lib/screenripper/verify.ts`, run the same way as Arkanoid's (bundle with rolldown, then node):
+`node scripts/verify-screenripper.mjs` runs `src/lib/screenripper/verify.ts` and then the shader
+compile check. Arkanoid's one-line rolldown command can't be reused: effects import shaders with
+Vite's `?raw` suffix, which needs a small rolldown plugin, and the glslang check needs Node APIs
+the app's tsconfig doesn't have. Exits non-zero on any failure.
 
 - **Key map:** ten effects, keys `1`–`0` each map to exactly one, every name unique.
 - **Cycle clock:** no change before 60 s, a change at 60 s, a keypress at 59 s restarts the count,
   hidden-tab time does not count, wrap from `0` to `1`.
-- **Mandelbrot depth:** run the iteration in float32 with `Math.fround` alongside float64 at
-  increasing zoom, find where they diverge visibly, and assert the chosen zoom ceiling sits below
-  it. This replaces the estimated 5,000× with a measured number.
+- **Mandelbrot depth:** run the shader's iteration op for op in float32 with `Math.fround`
+  alongside float64, and assert the zoom ceiling keeps colour errors under 5% with no blocking.
+  Also asserts 10× deeper fails, so the check can tell. Measured 1,500× (see §2).
 - **Pixel budget:** at 1080p@1×, 1440p@2× and 4K@2×, the GL canvas never exceeds the budget.
 - **Geometry:** each polyhedron satisfies V − E + F = 2; the fully-swayed Fractal Tree stays inside
   the viewport; seeded RNG is deterministic.
@@ -251,8 +281,8 @@ Each step can be checked on its own.
   timing and compile-ability but not whether a pattern looks good. Colours, speeds and density
   will need tuning by eye. Each effect keeps its tunables as constants at the top of its file.
 - **Photosensitivity.** "Visually stimulating" has a limit: no pattern flashes large areas of the
-  screen more than three times a second (WCAG 2.3.1). Plasma palette cycling and the Tunnel are
-  the two to watch. `prefers-reduced-motion` slows every pattern through a global time scale.
+  screen more than three times a second (WCAG 2.3.1). The Tunnel is the one to watch (its rate is
+  worked out in its shader's header comment: about 1.1 Hz). `prefers-reduced-motion` slows every pattern through a global time scale.
 - **Desktop only** (agreed 2026-10-26, as with Arkanoid). Keyboard control has no touch equivalent; the page
   will load on a phone but is not designed for it.
 - **Bundle size.** Adds an estimated 20–40 KB to what is already a single 904 KB chunk. Not a
