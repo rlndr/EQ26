@@ -53,9 +53,9 @@ export function solveJourney(input: JourneyInput): JourneyResult {
   const rawVal = Math.max(0, Number.isFinite(input.value) ? input.value : 0)
   const toYears = unitToYears(input.unit)
 
-  let shipYears = 0
-  let earthYears = 0
-  let distanceLy = 0
+  let shipYears: number
+  let earthYears: number
+  let distanceLy: number
 
   if (input.mode === 'shipTime') {
     shipYears = rawVal * toYears
