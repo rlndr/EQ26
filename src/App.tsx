@@ -12,6 +12,7 @@ import SpeakerBoxPage from './pages/SpeakerBoxPage'
 import TimeDilationPage from './pages/TimeDilationPage'
 import ScreenRipperPage from './pages/ScreenRipperPage'
 import AuroraPage from './pages/AuroraPage'
+import NearEarthPage from './pages/NearEarthPage'
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="time-dilation" element={<TimeDilationPage />} />
           <Route path="screenripper" element={<ScreenRipperPage />} />
           <Route path="aurora" element={<AuroraPage />} />
+          <Route path="near-earth" element={<NearEarthPage />} />
         </Route>
         <Route path="blog">
           <Route index element={<BlogPage />} />

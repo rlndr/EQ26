@@ -13,6 +13,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: () => '/',
       },
+      // The near-earth Lambda, run locally with `node lambda/near-earth/dev-server.mjs`
+      '/api/near-earth': {
+        target: process.env.NEAR_EARTH_API ?? 'http://localhost:8787',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/near-earth/, ''),
+      },
     },
   },
 })

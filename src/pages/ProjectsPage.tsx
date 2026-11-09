@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, ArrowRight, BookOpen, Clock, Gamepad2, MonitorPlay, Orbit, Satellite, Sparkles, Speaker } from 'lucide-react'
+import { Activity, ArrowRight, BookOpen, Clock, Gamepad2, MonitorPlay, Orbit, Radar, Satellite, Sparkles, Speaker } from 'lucide-react'
 
 const projects = [
   {
@@ -57,6 +57,13 @@ const projects = [
     icon: Sparkles,
     accent: 'text-rose-500',
     href: '/projects/aurora',
+  },
+  {
+    title: 'Near Earth',
+    description: 'Everything that has hit Earth, is passing it now, or might hit it one day. Replay 38 years of fireballs on a 3D globe, follow real asteroid flybys, and explore the list of objects NASA is watching.',
+    icon: Radar,
+    accent: 'text-rose-500',
+    href: '/projects/near-earth',
   },
   {
     title: 'Blog',
