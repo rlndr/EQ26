@@ -16,6 +16,7 @@ The earthquake monitor is the first of several tools and projects hosted here.
 | `/projects/speaker-box` | Speaker Box Designer — Loudspeaker enclosure calculator |
 | `/projects/time-dilation` | Time Dilation Explorer — Interactive special relativity lab |
 | `/projects/screenripper` | ScreenRipper — Fullscreen animated screensaver patterns |
+| `/projects/aurora` | Aurora Watch — Live aurora on a 3D globe, driven by NOAA forecasts |
 | `/blog` | Blog post index |
 | `/blog/:slug` | Individual blog post |
 
@@ -175,6 +176,39 @@ node scripts/verify-screenripper.mjs
 
 Runs `src/lib/screenripper/verify.ts` (key map, cycle timing across 30–240 Hz, wake lock races, pixel budget, every 2D pattern's real frame code against a recording context at four screen shapes, solid and tesseract geometry, the Mandelbrot float32 limit) and then compiles every `.glsl` file with `glslangValidator` (`sudo apt install glslang-tools`). Exits non-zero on any failure.
 
+## Aurora Watch
+
+A live aurora on a hand-written WebGL2 Earth, driven by NOAA's OVATION forecast. Spin the globe, click anywhere to see whether you could see the aurora from there, then drop to the ground and look up.
+
+### Features
+
+- **Live globe** — day and night Earth maps with the true day-night line, and aurora ray-marched through a shell at real emission altitudes
+- **Can I see it?** — a verdict for any location from the aurora in view, darkness, cloud cover and the Moon, with an hour-by-hour strip for the next 12 hours
+- **Ground view** — the camera flies down to a location; because the geometry is real, curtains overhead in the Arctic sit low on the horizon further south
+- **Sun to Earth** — an animated solar wind stream driven by live readings, with six wavelengths of the Sun, the magnetosphere's standoff distance, and NOAA's arrival time at Earth
+- **Storm Time Machine** — a Kp slider and presets up to the 1859 Carrington event, always labelled as simulated
+- **Space weather charts** — Kp with forecast, 24 hours of solar wind, and X-ray flux with flare classes
+
+### Data Sources
+
+- **NOAA Space Weather Prediction Center** (`services.swpc.noaa.gov`) — aurora grid, solar wind, Kp, scales, alerts, X-ray flux and solar imagery. No key required.
+- **Open-Meteo** — cloud cover and place search, CC BY 4.0, free for non-commercial use. It receives the chosen location rounded to 0.1°, and only once a location has been chosen.
+- **NASA Blue Marble and Black Marble** — static Earth maps in `public/aurora/`.
+
+All of these allow direct browser requests, so there is no Lambda. Any new external host must also be added to the Content Security Policy in `index.html`.
+
+### Architecture note
+
+Follows the ScreenRipper pattern: the globe (`globe.ts`) and solar wind strip (`solarWind.ts`) run outside React and report only discrete changes. Every feed quirk is absorbed in `parse.ts`, and the pure maths lives in `src/lib/aurora/` with a `verify.ts` harness.
+
+### Verifying
+
+```bash
+node scripts/verify-aurora.mjs
+```
+
+Runs the numerical checks, including Sun and Moon positions against US Naval Observatory values, and compiles the shader with `glslangValidator`.
+
 ## Blog
 
 Markdown-based blog sourced from `.md` files in `src/content/blog/`. Adding a post is as simple as dropping a `.md` file with the required frontmatter and rebuilding.
@@ -246,9 +280,11 @@ lambda/
 └── planet-positions/
     └── index.mjs            # planetPositions Lambda — JPL Horizons proxy + daily cache
 scripts/
+├── verify-aurora.mjs        # Aurora Watch checks + GLSL compile
 └── verify-screenripper.mjs  # ScreenRipper checks + GLSL compile
 src/
 ├── components/
+│   ├── aurora/              # Aurora Watch panels, globe host, solar wind strip, charts
 │   ├── EventsList.tsx       # Scrollable list of individual earthquake events
 │   ├── Layout.tsx           # Shared nav, footer, and page shell
 │   ├── MagnitudeChart.tsx   # Recharts bar chart by magnitude band
@@ -258,6 +294,7 @@ src/
 ├── content/
 │   └── blog/                # Markdown blog posts (drop .md files here)
 ├── lib/
+│   ├── aurora/              # NOAA feeds and parsing, globe renderer and shader, Sun/Moon, storm model
 │   ├── arkanoid/            # Game engine: constants, physics, levels, render, audio
 │   ├── enclosure/           # Speaker box maths: volume, ports, alignment, cut list
 │   ├── relativity/          # Special relativity maths, slider curves, cosmic journey solver
@@ -272,6 +309,7 @@ src/
 │   ├── SpeakerBoxPage.tsx   # Speaker enclosure designer
 │   ├── TimeDilationPage.tsx # Special relativity time dilation explorer
 │   ├── ScreenRipperPage.tsx # Fullscreen screensaver patterns
+│   ├── AuroraPage.tsx       # Live aurora globe and space weather
 │   ├── BlogPostPage.tsx     # Individual blog post renderer
 │   ├── EQPage.tsx           # Earthquake monitor dashboard
 │   ├── ISSPage.tsx          # ISS live tracker
