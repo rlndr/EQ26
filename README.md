@@ -17,6 +17,7 @@ The earthquake monitor is the first of several tools and projects hosted here.
 | `/projects/time-dilation` | Time Dilation Explorer — Interactive special relativity lab |
 | `/projects/screenripper` | ScreenRipper — Fullscreen animated screensaver patterns |
 | `/projects/aurora` | Aurora Watch — Live aurora on a 3D globe, driven by NOAA forecasts |
+| `/projects/near-earth` | Near Earth — Fireballs, asteroid flybys and the impact risk list |
 | `/blog` | Blog post index |
 | `/blog/:slug` | Individual blog post |
 
@@ -209,6 +210,41 @@ node scripts/verify-aurora.mjs
 
 Runs the numerical checks, including Sun and Moon positions against US Naval Observatory values, and compiles the shader with `glslangValidator`.
 
+## Near Earth
+
+Everything that has hit Earth, is passing it now, or might hit it one day, from NASA JPL data.
+
+### Features
+
+- **Impact Globe** — 38 years of fireballs replayed on a WebGL2 Earth, with a scrubber, energy filter, and click-to-select
+- **Close passes** — asteroids passing within 0.05 au by date and distance, with JPL's uncertainty range for each
+- **Flyby view** — the object's real path past the Earth and Moon from JPL Horizons, in log or linear distance
+- **Risk explorer** — every object on JPL's Sentry list on a Palermo-scale chart and sortable table, with odds in plain words
+- **Energy ladder** — one scale from Hiroshima to Chicxulub that any fireball or risk object can be added to
+
+### Data Sources
+
+All from **NASA JPL**, no key required: the Fireball, Close Approach (`cad`), Sentry and SBDB APIs at `ssd-api.jpl.nasa.gov`, and Horizons at `ssd.jpl.nasa.gov`.
+
+None allow browser requests, so `lambda/near-earth/` serves them compactly with caching. As with the Orrery, the browser reaches the Lambda through a same-origin path, `/api/near-earth/<route>`: a Vite proxy in development and an Amplify 200 rewrite in production. Designations in a path are only used if they are on the current flyby or risk list, so the Lambda can't be used as a general proxy to JPL.
+
+### Running locally
+
+```bash
+node lambda/near-earth/dev-server.mjs   # the API, on port 8787
+npm run dev                             # in a second terminal
+```
+
+Set `NEAR_EARTH_API` to send the Vite proxy to a deployed Function URL instead.
+
+### Verifying
+
+```bash
+node scripts/verify-near-earth.mjs
+```
+
+Runs the Lambda's checks and the front-end numerical checks, and compiles the shaders with `glslangValidator`.
+
 ## Blog
 
 Markdown-based blog sourced from `.md` files in `src/content/blog/`. Adding a post is as simple as dropping a `.md` file with the required frontmatter and rebuilding.
@@ -277,14 +313,17 @@ npm run lint
 
 ```
 lambda/
+├── near-earth/              # near-earth Lambda — JPL fireball, flyby and risk data + cache
 └── planet-positions/
     └── index.mjs            # planetPositions Lambda — JPL Horizons proxy + daily cache
 scripts/
 ├── verify-aurora.mjs        # Aurora Watch checks + GLSL compile
+├── verify-near-earth.mjs    # Near Earth checks + GLSL compile
 └── verify-screenripper.mjs  # ScreenRipper checks + GLSL compile
 src/
 ├── components/
 │   ├── aurora/              # Aurora Watch panels, globe host, solar wind strip, charts
+│   ├── nearearth/           # Near Earth globe host, flyby view, risk explorer, charts
 │   ├── EventsList.tsx       # Scrollable list of individual earthquake events
 │   ├── Layout.tsx           # Shared nav, footer, and page shell
 │   ├── MagnitudeChart.tsx   # Recharts bar chart by magnitude band
@@ -295,6 +334,7 @@ src/
 │   └── blog/                # Markdown blog posts (drop .md files here)
 ├── lib/
 │   ├── aurora/              # NOAA feeds and parsing, globe renderer and shader, Sun/Moon, storm model
+│   ├── nearearth/           # Near Earth API client, scales, fireball globe, flyby diagram
 │   ├── arkanoid/            # Game engine: constants, physics, levels, render, audio
 │   ├── enclosure/           # Speaker box maths: volume, ports, alignment, cut list
 │   ├── relativity/          # Special relativity maths, slider curves, cosmic journey solver
@@ -310,6 +350,7 @@ src/
 │   ├── TimeDilationPage.tsx # Special relativity time dilation explorer
 │   ├── ScreenRipperPage.tsx # Fullscreen screensaver patterns
 │   ├── AuroraPage.tsx       # Live aurora globe and space weather
+│   ├── NearEarthPage.tsx    # Fireballs, flybys and the impact risk list
 │   ├── BlogPostPage.tsx     # Individual blog post renderer
 │   ├── EQPage.tsx           # Earthquake monitor dashboard
 │   ├── ISSPage.tsx          # ISS live tracker
