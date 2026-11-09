@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, ArrowRight, BookOpen, Clock, Gamepad2, MonitorPlay, Orbit, Satellite, Speaker } from 'lucide-react'
+import { Activity, ArrowRight, BookOpen, Clock, Gamepad2, MonitorPlay, Orbit, Satellite, Sparkles, Speaker } from 'lucide-react'
 
 const projects = [
   {
@@ -50,6 +50,13 @@ const projects = [
     icon: MonitorPlay,
     accent: 'text-rose-500',
     href: '/projects/screenripper',
+  },
+  {
+    title: 'Aurora Watch',
+    description: 'A live aurora on a 3D Earth, driven by NOAA forecasts. Check whether you could see it from anywhere tonight, stand on the ground and look up, and follow the solar wind from Sun to Earth.',
+    icon: Sparkles,
+    accent: 'text-rose-500',
+    href: '/projects/aurora',
   },
   {
     title: 'Blog',
