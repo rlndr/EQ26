@@ -1,19 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { propagatedWindQuery, suviImageUrl, SUVI_WAVELENGTHS, windHistoryQuery, type SuviWavelength } from '../../lib/aurora/feeds'
+import { propagatedWindQuery, suviImageUrl, SUVI_NOTES, SUVI_WAVELENGTHS, windHistoryQuery, type SuviWavelength } from '../../lib/aurora/feeds'
 import { clockTime, shortDayTime, timeAgo } from '../../lib/aurora/format'
 import { REGION_NOTES, standoffRadii, type WindRegion } from '../../lib/aurora/magnetosphere'
 import { latestComplete } from '../../lib/aurora/parse'
 import { SolarWindStrip as Strip } from '../../lib/aurora/solarWind'
-
-const WAVELENGTH_NOTES: Record<SuviWavelength, string> = {
-  '304': 'Chromosphere, about 50,000 K',
-  '171': 'Quiet corona, about 600,000 K',
-  '195': 'Corona, about 1 million K',
-  '131': 'Flaring plasma, about 10 million K',
-  '094': 'Hot flaring regions, about 6 million K',
-  '284': 'Active regions, about 2 million K',
-}
 
 const REGIONS: WindRegion[] = ['sun', 'wind', 'l1', 'shield', 'earth']
 
@@ -90,7 +81,7 @@ export default function SolarWindStrip() {
             <button
               key={w}
               onClick={() => setWavelength(w)}
-              title={WAVELENGTH_NOTES[w]}
+              title={SUVI_NOTES[w]}
               aria-pressed={wavelength === w}
               className={`px-1.5 py-0.5 rounded border font-mono text-[11px] transition-colors ${
                 wavelength === w ? 'border-brass bg-brass/10 text-brass' : 'border-zinc-700 text-zinc-500 hover:text-brass'

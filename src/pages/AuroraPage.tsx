@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 import { ArrowUp, Compass, Crosshair, Minus, Plus, Rocket } from 'lucide-react'
 import AlertBar from '../components/aurora/AlertBar'
 import ChartsTabs from '../components/aurora/ChartsTabs'
+import Definitions from '../components/aurora/Definitions'
 import GlobeStage from '../components/aurora/GlobeStage'
 import ScalesPanel from '../components/aurora/ScalesPanel'
 import SolarWindStrip from '../components/aurora/SolarWindStrip'
@@ -329,6 +330,7 @@ export default function AuroraPage() {
           <h2 className="text-xs uppercase tracking-[0.15em] text-zinc-500">How it works</h2>
           <p>Where the aurora is, and how strong, comes from NOAA&apos;s OVATION forecast, which looks 30 to 90 minutes ahead. That forecast is a probability of seeing aurora, so turning it into glow is an artistic choice. It covers a grid of 1° cells, about 111 km across, so the individual folds and rays are drawn procedurally. Colours are camera-like: faint aurora often looks grey-green to the eye.</p>
           <p>The Storm Time Machine and the hours-ahead preview use a simplified oval built on a rule of thumb, and the Carrington preset is an estimate from historical accounts. The Sun-to-Earth strip is schematic and not to scale. The viewing verdict doesn&apos;t know about terrain, light pollution or how open your northern sky is.</p>
+          <Definitions />
           <p className="text-xs text-zinc-500">
             Data: <a className="underline hover:text-brass" href="https://www.swpc.noaa.gov/" target="_blank" rel="noreferrer">NOAA Space Weather Prediction Center</a>. Cloud cover and place search: <a className="underline hover:text-brass" href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> (CC BY 4.0), which receives your chosen location rounded to about 11 km. Earth imagery: NASA Blue Marble and Black Marble.
           </p>
