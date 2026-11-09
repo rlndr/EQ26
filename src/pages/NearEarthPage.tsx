@@ -213,6 +213,10 @@ export default function NearEarthPage() {
                 <dt className="inline font-medium text-zinc-200">Palermo scale: </dt>
                 <dd className="inline">compares an asteroid&apos;s chance of impact with the background risk of an impact at least as energetic in the years until that date. Each whole number is ten times the relative risk: 0 matches the background risk, −2 is 1% of it, and NASA says values below −2 have no likely consequences.</dd>
               </div>
+              <div>
+                <dt className="inline font-medium text-zinc-200">Torino scale: </dt>
+                <dd className="inline">a simple 0 to 10 rating for the public that combines an asteroid&apos;s chance of impact with its impact energy. 0 means effectively no hazard, 1 is a normal discovery, 2 to 4 merit attention from astronomers, 5 to 7 are threatening, and 8 to 10 are certain collisions. It only rates possible impacts in the next 100 years.</dd>
+              </div>
             </dl>
             <p className="text-xs text-zinc-500">
               Data: <a className="underline hover:text-brass" href="https://cneos.jpl.nasa.gov/" target="_blank" rel="noreferrer">NASA/JPL Center for Near Earth Object Studies</a> and <a className="underline hover:text-brass" href="https://ssd.jpl.nasa.gov/horizons/" target="_blank" rel="noreferrer">JPL Horizons</a>. Earth imagery: NASA Blue Marble and Black Marble.

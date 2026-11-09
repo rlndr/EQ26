@@ -113,6 +113,16 @@ export async function searchPlaces(name: string) {
 export const SUVI_WAVELENGTHS = ['304', '171', '195', '131', '094', '284'] as const
 export type SuviWavelength = (typeof SUVI_WAVELENGTHS)[number]
 
+/** Used for both the button tooltips and the definitions on the page, so the two cannot disagree */
+export const SUVI_NOTES: Record<SuviWavelength, string> = {
+  '304': 'The chromosphere, the layer below the corona, at about 50,000 K. Shows prominences and filaments.',
+  '171': 'The quiet corona at about 800,000 K. Shows coronal structure such as magnetic loops.',
+  '195': 'The corona at about 1.2 million K. Shows active regions and dark coronal holes.',
+  '131': 'The hottest flare plasma, above 10 million K.',
+  '094': 'Very hot flare plasma, at about 6 million K.',
+  '284': 'Active regions in the corona, at about 2 million K.',
+}
+
 export const suviImageUrl = (wavelength: SuviWavelength) =>
   `${SWPC}/images/animations/suvi/primary/${wavelength}/latest.png`
 
