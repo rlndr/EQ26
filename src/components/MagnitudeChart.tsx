@@ -8,17 +8,10 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts'
-import { MAGNITUDE_BANDS, type MagnitudeBand } from '../lib/process'
+import { BAND_COLORS, MAGNITUDE_BANDS, type MagnitudeBand } from '../lib/process'
 
 interface MagnitudeChartProps {
   byBand: Record<MagnitudeBand, number>
-}
-
-const BAND_COLORS: Record<MagnitudeBand, string> = {
-  'M5.x': '#f59e0b', // amber-500
-  'M6.x': '#f97316', // orange-500
-  'M7.x': '#ef4444', // red-500
-  'M8+': '#a855f7',  // purple-500
 }
 
 interface CustomTooltipProps {

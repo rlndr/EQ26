@@ -3,6 +3,13 @@ import { type EarthquakeFeature, parseRegion, getMagnitudeBand } from './api'
 export const MAGNITUDE_BANDS = ['M5.x', 'M6.x', 'M7.x', 'M8+'] as const
 export type MagnitudeBand = (typeof MAGNITUDE_BANDS)[number]
 
+export const BAND_COLORS: Record<MagnitudeBand, string> = {
+  'M5.x': '#f59e0b', // amber-500
+  'M6.x': '#f97316', // orange-500
+  'M7.x': '#ef4444', // red-500
+  'M8+': '#a855f7',  // purple-500
+}
+
 export interface RegionRow {
   region: string
   total: number
