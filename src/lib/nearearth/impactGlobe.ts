@@ -3,13 +3,13 @@ import {
   DEFAULT_DIST, ease, lerpLon, MAX_DIST, MAX_ORBIT_LAT, MIN_DIST, orbitPose, projectPoint, viewTangents, type OrbitState,
 } from '../aurora/camera'
 import { createProgram, glBackingSize, PIXEL_BUDGET } from '../screenripper/gl'
-import type { LocatedFireball, MarkerData } from './markers'
+import type { Located, LocatedFireball, MarkerData } from './markers'
 import EARTH_FRAG from './earth.frag.glsl?raw'
 import MARKERS_FRAG from './markers.frag.glsl?raw'
 import MARKERS_VERT from './markers.vert.glsl?raw'
 
-export interface HoveredFireball {
-  event: LocatedFireball
+export interface HoveredFireball<E extends Located = LocatedFireball> {
+  event: E
   /** Canvas-relative CSS pixels */
   x: number
   y: number
@@ -32,18 +32,27 @@ const REDUCED_STEPS = 38
 const TEX_DAY = 0
 const DAY_URL = '/aurora/earth-day.webp'
 
+export interface ImpactGlobeOptions {
+  /** The canvas's accessible name */
+  label?: string
+  /** Prefix for console messages */
+  name?: string
+  /** 'ember' shades markers orange to amber by strength; 'magnitude' uses the earthquake band colours */
+  palette?: 'ember' | 'magnitude'
+}
+
 /**
  * The fireball globe. Lives outside React like the Aurora Watch globe, reporting only discrete
  * changes through callbacks. It makes its own canvas because dispose() gives up the WebGL context,
  * and a canvas can only ever hold one.
  */
-export class ImpactGlobe {
+export class ImpactGlobe<E extends Located = LocatedFireball> {
   readonly el: HTMLElement
   readonly canvas: HTMLCanvasElement
   failed = false
 
-  onHover: (hovered: HoveredFireball | null) => void = () => {}
-  onSelect: (event: LocatedFireball | null) => void = () => {}
+  onHover: (hovered: HoveredFireball<E> | null) => void = () => {}
+  onSelect: (event: E | null) => void = () => {}
   /** Every frame the timeline moves, so the scrubber can be written directly */
   onCursor: (fraction: number) => void = () => {}
   onPlayingChange: (playing: boolean) => void = () => {}
@@ -60,6 +69,8 @@ export class ImpactGlobe {
   private glLost = false
   private maxPoint = 64
   private dayImage: HTMLImageElement | null = null
+  private name: string
+  private palette: number
 
   private ro: ResizeObserver
   private io: IntersectionObserver
@@ -72,14 +83,14 @@ export class ImpactGlobe {
   private dirty = true
   private disposed = false
 
-  private markers: MarkerData | null = null
+  private markers: MarkerData<E> | null = null
   private cursor = 1
   /** Timeline fractions per second while playing; 0 when still */
   private rate = 0
   private stepTimer = 0
   private range: [number, number] = [0, 1]
   private minEnergy = 0
-  private selected: LocatedFireball | null = null
+  private selected: E | null = null
 
   private orbit: OrbitState = { lat: 22, lon: 30, dist: DEFAULT_DIST }
   private velLat = 0
@@ -93,13 +104,15 @@ export class ImpactGlobe {
   private hoverAt: { x: number; y: number } | null = null
   private hoverDirty = false
 
-  constructor(el: HTMLElement) {
+  constructor(el: HTMLElement, options: ImpactGlobeOptions = {}) {
     this.el = el
+    this.name = options.name ?? 'Near Earth'
+    this.palette = options.palette === 'magnitude' ? 1 : 0
     this.canvas = document.createElement('canvas')
     this.canvas.className = 'absolute inset-0 w-full h-full block outline-none'
     this.canvas.tabIndex = 0
     this.canvas.setAttribute('role', 'application')
-    this.canvas.setAttribute('aria-label', 'Globe of recorded fireballs. Arrow keys rotate, plus and minus zoom. The largest events are listed below.')
+    this.canvas.setAttribute('aria-label', options.label ?? 'Globe of recorded fireballs. Arrow keys rotate, plus and minus zoom. The largest events are listed below.')
     this.canvas.style.touchAction = 'none'
     this.canvas.style.cursor = 'grab'
     el.prepend(this.canvas)
@@ -171,13 +184,34 @@ export class ImpactGlobe {
 
   // --- Commands from the page --------------------------------------------------
 
-  setMarkers(markers: MarkerData) {
+  setMarkers(markers: MarkerData<E>) {
     const first = this.markers === null
     this.markers = markers
     this.uploadMarkers()
     if (first && !this.reducedMotion) this.startPlaying(0, INTRO_SECONDS)
     else this.onCursor(this.cursor)
     this.dirty = true
+  }
+
+  /** Nothing drawn or hoverable, and nothing playing, until the next setMarkers() */
+  clearMarkers() {
+    this.stopPlaying()
+    this.markers = null
+    this.hoverDirty = true
+    this.dirty = true
+  }
+
+  /** Play the whole timeline once more, as the intro does; with reduced motion, just show it all */
+  replay() {
+    if (this.reducedMotion) {
+      this.stopPlaying()
+      this.cursor = 1
+      this.hoverDirty = true
+      this.dirty = true
+    } else {
+      this.startPlaying(0, INTRO_SECONDS)
+    }
+    this.onCursor(this.cursor)
   }
 
   togglePlay() {
@@ -215,7 +249,7 @@ export class ImpactGlobe {
     this.dirty = true
   }
 
-  setSelected(event: LocatedFireball | null) {
+  setSelected(event: E | null) {
     this.selected = event
     this.dirty = true
   }
@@ -272,11 +306,11 @@ export class ImpactGlobe {
   private advance(dt: number) {
     if (this.rate === 0) return
     if (this.reducedMotion) {
-      // No continuous motion: jump a year at a time
+      // No continuous motion: jump a step (a year, unless the markers say otherwise) at a time
       this.stepTimer += dt
       if (this.stepTimer < STEP_SECONDS) return
       this.stepTimer = 0
-      this.cursor = Math.min(1, this.cursor + 1 / REDUCED_STEPS)
+      this.cursor = Math.min(1, this.cursor + 1 / (this.markers?.steps ?? REDUCED_STEPS))
     } else {
       this.cursor = Math.min(1, this.cursor + this.rate * dt)
     }
@@ -342,7 +376,7 @@ export class ImpactGlobe {
       if (this.disposed) return
       this.uploadImage(TEX_DAY, this.dayImage)
     } catch (err) {
-      console.warn('Near Earth: could not load the Earth maps', err)
+      console.warn(`${this.name}: could not load the Earth maps`, err)
     }
   }
 
@@ -363,7 +397,7 @@ export class ImpactGlobe {
   }
 
   private fail(reason: unknown) {
-    console.error('Near Earth: the globe could not start', reason)
+    console.error(`${this.name}: the globe could not start`, reason)
     this.failed = true
     this.canvas.style.display = 'none'
     queueMicrotask(() => this.onFailure())
@@ -499,12 +533,13 @@ export class ImpactGlobe {
     // Markers grow a little as you zoom in, and match the drawing buffer's pixel density
     gl.uniform1f(pu('uPixelScale'), (h / 700) * Math.sqrt(DEFAULT_DIST / this.orbit.dist))
     gl.uniform1f(pu('uMaxPoint'), this.maxPoint)
+    gl.uniform1f(pu('uPalette'), this.palette)
     gl.drawArrays(gl.POINTS, 0, this.markers.events.length)
   }
 
   // --- Picking and input -------------------------------------------------------
 
-  private nearestFireball(clientX: number, clientY: number): HoveredFireball | null {
+  private nearestFireball(clientX: number, clientY: number): HoveredFireball<E> | null {
     const markers = this.markers
     if (!markers) return null
     const rect = this.canvas.getBoundingClientRect()
@@ -512,7 +547,7 @@ export class ImpactGlobe {
     const pose = orbitPose(this.orbit.lat, this.orbit.lon, this.orbit.dist)
     const x = clientX - rect.left
     const y = clientY - rect.top
-    let best: HoveredFireball | null = null
+    let best: HoveredFireball<E> | null = null
     let bestDist = PICK_RADIUS_PX
     markers.events.forEach((event, i) => {
       const t = markers.times[i]

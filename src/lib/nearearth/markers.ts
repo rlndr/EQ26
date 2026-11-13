@@ -6,9 +6,15 @@ export interface LocatedFireball extends Fireball {
   lon: number
 }
 
-export interface MarkerData {
+/** Anything the globe can place on the Earth */
+export interface Located {
+  lat: number
+  lon: number
+}
+
+export interface MarkerData<E extends Located = LocatedFireball> {
   /** Events with a location, oldest first, in buffer order */
-  events: LocatedFireball[]
+  events: E[]
   positions: Float32Array
   /** 0 at the first event, 1 at `endMs` */
   times: Float32Array
@@ -16,6 +22,8 @@ export interface MarkerData {
   energies: Float32Array
   startMs: number
   endMs: number
+  /** Steps across the timeline when playing with reduced motion; the globe's default when absent */
+  steps?: number
 }
 
 const LOG_FAINTEST = Math.log10(0.05)

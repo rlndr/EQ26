@@ -43,6 +43,9 @@ node scripts/verify-aurora.mjs
 node scripts/verify-near-earth.mjs    # includes the near-earth Lambda's checks
 ```
 
+Also run `node scripts/verify-earthquakes.mjs` (earthquake globe markers) when touching the
+earthquake monitor or the shared globe. `factory/checks.sh` does not run it.
+
 ## Conventions
 
 - A project is a page in `src/pages/`, components in `src/components/<project>/`,
