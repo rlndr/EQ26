@@ -28,6 +28,7 @@ Explores the frequency and severity of earthquakes worldwide. Data is sourced in
 ### Features
 
 - **Month selector** — browse any month going back 2 years
+- **Replay globe** — a slowly spinning WebGL globe (the Near Earth engine) that replays the selected month's quakes from the 1st to the last day when the data loads, and again on every month change. Play/pause and a scrubber with a date label; markers grow with magnitude and take the band colours (M5.x amber, M6.x orange, M7.x red, M8+ purple); hovering one shows its date, magnitude and place. With reduced motion there is no spin or autoplay and Play steps a day at a time; without WebGL2 it falls back to a flat map of the month's quakes
 - **Summary cards** — total events, max magnitude, regions affected, and strongest event location
 - **Magnitude chart** — bar chart breaking down event counts by magnitude band (M5.x, M6.x, M7.x, M8+)
 - **Region table** — top 15 affected regions with per-band counts
@@ -318,11 +319,13 @@ lambda/
     └── index.mjs            # planetPositions Lambda — JPL Horizons proxy + daily cache
 scripts/
 ├── verify-aurora.mjs        # Aurora Watch checks + GLSL compile
+├── verify-earthquakes.mjs   # Earthquake globe marker checks
 ├── verify-near-earth.mjs    # Near Earth checks + GLSL compile
 └── verify-screenripper.mjs  # ScreenRipper checks + GLSL compile
 src/
 ├── components/
 │   ├── aurora/              # Aurora Watch panels, globe host, solar wind strip, charts
+│   ├── earthquakes/         # Earthquake monitor replay globe host
 │   ├── nearearth/           # Near Earth globe host, flyby view, risk explorer, charts
 │   ├── EventsList.tsx       # Scrollable list of individual earthquake events
 │   ├── Layout.tsx           # Shared nav, footer, and page shell
@@ -334,6 +337,7 @@ src/
 │   └── blog/                # Markdown blog posts (drop .md files here)
 ├── lib/
 │   ├── aurora/              # NOAA feeds and parsing, globe renderer and shader, Sun/Moon, storm model
+│   ├── earthquakes/         # Earthquake globe markers: magnitude levels, month timeline, date labels
 │   ├── nearearth/           # Near Earth API client, scales, fireball globe, flyby diagram
 │   ├── arkanoid/            # Game engine: constants, physics, levels, render, audio
 │   ├── enclosure/           # Speaker box maths: volume, ports, alignment, cut list
