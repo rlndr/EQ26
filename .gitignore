@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Software factory: runtime state and per-job worktrees
+/factory/jobs/
+/.worktrees/

@@ -54,6 +54,13 @@ export async function fetchEarthquakes(
   return data.features
 }
 
+/** The previous complete month, which the earthquake monitor opens on. */
+export function getDefaultMonth(): { year: number; month: number } {
+  const now = new Date()
+  const prev = new Date(Date.UTC(now.getFullYear(), now.getMonth() - 1, 1))
+  return { year: prev.getUTCFullYear(), month: prev.getUTCMonth() + 1 }
+}
+
 /**
  * Parse the region (country/area) from a USGS place string.
  * Typical formats:

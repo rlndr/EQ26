@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { MAGNITUDE_BANDS, type RegionRow } from '../lib/process'
 
@@ -17,11 +17,9 @@ const BAND_TEXT: Record<string, string> = {
 
 const PAGE_SIZE = 15
 
+// EQPage keys this component on the month, so a month switch remounts it on page 1.
 export default function RegionTable({ byRegion, selectedRegion, onSelectRegion }: RegionTableProps) {
   const [page, setPage] = useState(0)
-
-  // Reset to first page whenever the dataset changes (month switch)
-  useEffect(() => { setPage(0) }, [byRegion])
 
   const totalPages = Math.max(1, Math.ceil(byRegion.length / PAGE_SIZE))
   const rows = byRegion.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)

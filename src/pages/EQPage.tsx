@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { fetchEarthquakes } from '../lib/api'
+import { fetchEarthquakes, getDefaultMonth } from '../lib/api'
 import { processEarthquakes } from '../lib/process'
-import MonthSelector, { getDefaultMonth } from '../components/MonthSelector'
+import MonthSelector from '../components/MonthSelector'
 import SummaryCards from '../components/SummaryCards'
 import MagnitudeChart from '../components/MagnitudeChart'
 import RegionTable from '../components/RegionTable'
@@ -115,6 +115,7 @@ export default function EQPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <MagnitudeChart byBand={processed.byBand} />
             <RegionTable
+              key={`${year}-${month}`}
               byRegion={processed.byRegion}
               selectedRegion={selectedRegion}
               onSelectRegion={(r) => setSelectedRegion(r === selectedRegion ? null : r)}

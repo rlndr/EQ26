@@ -26,12 +26,6 @@ function generateOptions() {
   return options
 }
 
-export function getDefaultMonth(): { year: number; month: number } {
-  const now = new Date()
-  const prev = new Date(Date.UTC(now.getFullYear(), now.getMonth() - 1, 1))
-  return { year: prev.getUTCFullYear(), month: prev.getUTCMonth() + 1 }
-}
-
 export default function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
   const options = generateOptions()
   const value = `${year}-${String(month).padStart(2, '0')}`
