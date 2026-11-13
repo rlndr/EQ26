@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchEarthquakes, getDefaultMonth } from '../lib/api'
+import { buildQuakeMarkers } from '../lib/earthquakes/markers'
 import { processEarthquakes } from '../lib/process'
 import MonthSelector from '../components/MonthSelector'
 import SummaryCards from '../components/SummaryCards'
 import MagnitudeChart from '../components/MagnitudeChart'
 import RegionTable from '../components/RegionTable'
 import EventsList from '../components/EventsList'
+import QuakeGlobeStage from '../components/earthquakes/QuakeGlobeStage'
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -76,6 +78,8 @@ export default function EQPage() {
   })
 
   const processed = features ? processEarthquakes(features) : null
+  // Memoised so that only a new month's data restarts the replay
+  const markers = useMemo(() => (features ? buildQuakeMarkers(features, year, month) : null), [features, year, month])
 
   function handleMonthChange(y: number, m: number) {
     setYear(y)
@@ -94,6 +98,8 @@ export default function EQPage() {
         </div>
         <MonthSelector year={year} month={month} onChange={handleMonthChange} />
       </div>
+
+      <QuakeGlobeStage markers={markers} />
 
       {isLoading && <LoadingSkeleton />}
 
