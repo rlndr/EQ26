@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push -u origin factory/*)",
+      "Bash(gh pr create --draft *)"
+    ]
+  }
+}
